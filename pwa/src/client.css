@@ -1,0 +1,50 @@
+/* Uses Quartz theme variables so the UI follows light/dark mode. */
+#pwa-ui {
+  position: fixed;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(32rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+#pwa-ui .pwa-toast {
+  pointer-events: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--lightgray);
+  border-radius: 8px;
+  background: var(--light);
+  color: var(--darkgray);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  font-family: var(--bodyFont);
+  font-size: 0.95rem;
+}
+
+#pwa-ui .pwa-toast p {
+  flex: 1 1 14rem;
+  margin: 0;
+}
+
+#pwa-ui .pwa-toast button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--darkgray);
+  font: inherit;
+  cursor: pointer;
+}
+
+#pwa-ui .pwa-toast button.primary {
+  border-color: var(--secondary);
+  background: var(--secondary);
+  color: var(--light);
+}

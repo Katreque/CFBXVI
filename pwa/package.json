@@ -1,0 +1,30 @@
+{
+  "name": "cfbxvi-pwa",
+  "private": true,
+  "type": "module",
+  "description": "Post-build step that turns the Quartz output in ../public into an offline-first PWA",
+  "scripts": {
+    "build": "node build.mjs",
+    "preview": "node serve.mjs",
+    "icons": "node icons.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "d3": "7.9.0",
+    "esbuild": "0.28.2",
+    "katex": "0.16.11",
+    "pixi.js": "8.22.0",
+    "sharp": "0.35.5",
+    "workbox-build": "7.4.1",
+    "workbox-core": "7.4.1",
+    "workbox-precaching": "7.4.1",
+    "workbox-routing": "7.4.1",
+    "workbox-strategies": "7.4.1",
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
