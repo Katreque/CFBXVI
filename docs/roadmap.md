@@ -14,7 +14,8 @@
 - [x] Offline end-to-end tests (18 passing locally)
 - [x] Deploy workflow (build → PWA → tests → Pages)
 - [x] Pages enabled and first deploy green (2026-10-23); offline smoke test against production passed
-- [ ] Real-device check: install on iPhone and Android, airplane mode, update flow
+- [x] Real-device check on Android: install, airplane mode, update flow (2026-10-23)
+- [ ] Real-device check on iPhone: install, airplane mode, update flow
 - [ ] Final app name, icon and colors (currently placeholders: "CFBXVI", text icon)
 
 ## Open questions

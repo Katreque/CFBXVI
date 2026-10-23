@@ -121,3 +121,10 @@ The post-build step also fixes plugins that emit root-absolute `/static/` links 
 - **Preview server:** hardened against malformed URLs and path traversal.
 
 **Not changed:** search patches still match minified code (D-013). The build fails loudly when they stop matching, and the long-term fix is upstream PRs (see roadmap).
+
+## D-016 · CI runs Quartz directly, not through `npx`
+**Date:** 2026-10-23 · **Status:** Accepted
+
+**Decision:** The workflow runs `node quartz/bootstrap-cli.mjs <command>` instead of `npx quartz <command>`. Restored the executable bit on `quartz/bootstrap-cli.mjs`, which was lost when Quartz was copied on Windows.
+**Why:** After the first green deploy, two runs failed in "Install Quartz plugins" with exit code 127 (command not found). Running the script directly doesn't depend on how npm resolves the project's own bin, or on the npm cache restored between runs.
+**Consequences:** When vendoring or upgrading Quartz from Windows, check that file modes match upstream (`git ls-files -s`). Locally, `npx quartz ...` still works.
