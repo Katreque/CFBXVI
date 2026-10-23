@@ -38,14 +38,16 @@ Expected volume: about 20 course sections, roughly 1.2 MB of PDF each.
 ## Markdown conventions
 
 - Obsidian-flavoured: `[[wikilinks]]`, `![[embeds]]`, YAML frontmatter, `#tags` only in frontmatter.
-- Note titles keep Portuguese accents. (To verify: how Quartz v5 turns accented titles into URL slugs.)
+- Note titles keep Portuguese accents. Quartz keeps them in URLs too, lowercased: `Seção 01 - Introdução.md` becomes `secoes/seção-01---introdução`. These URLs work offline (tested). Note that ` - ` turns into `---`, so prefer file names without it, e.g. `01 Introdução.md`. *(Decide on the first real section.)*
+- **An alias must never equal the note's own title (case-insensitive).** Quartz creates a redirect page for each alias. An alias such as `função` on the note `Função` takes over the note's URL: wikilinks then point to the redirect, and **backlinks disappear**. The linker must validate this, and also that no alias collides with another note's title.
+- Every folder gets an `index.md` with a Portuguese `title` (otherwise breadcrumbs show the raw folder name).
 - One note per course section, unless a section is long enough to split by topic. *(Open question; decide on the first real section.)*
 
 ## `glossary.yml` shape (draft)
 
 ```yaml
 - concept: Célula
-  aliases: [células, celular, celulares]
+  aliases: [células, celular, celulares]   # never "célula" itself (see conventions)
   tags: [biologia/citologia]
   description: Unidade estrutural e funcional dos seres vivos.
 ```

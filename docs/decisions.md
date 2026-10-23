@@ -65,3 +65,46 @@ Each entry records what was decided, why, and its consequences. Supersede an ent
 
 **Decision:** Quartz locale `pt-BR`. Concept extraction, glossary and UI strings are in Portuguese.
 **Consequences:** Search should ignore accents (to verify in v5). Glossary aliases must cover inflected word forms so the linker matches real text.
+
+## D-010 · Vendor Quartz at a pinned commit, without its history
+**Date:** 2026-10-23 · **Status:** Accepted
+
+**Decision:** Copy Quartz v5 into the repo at a pinned upstream commit, without merging its git history. Upgrade by applying the upstream diff between pins (`docs/quartz-upgrades.md`).
+**Why:** `npx quartz upgrade` is a `git pull` from upstream, so it needs shared history. That would bring in thousands of upstream commits, plus Quartz's own `docs/` folder, which would collide with ours on every upgrade.
+**Consequences:** Upgrades are a documented manual step. Our additions live outside Quartz's files (`pwa/`, `docs/`, `content/`, `.github/`) to keep conflicts rare.
+
+## D-011 · PWA as a separate post-build package (`pwa/`)
+**Date:** 2026-10-23 · **Status:** Accepted · *Refines D-004*
+
+**Decision:** The PWA layer is a standalone npm package in `pwa/` that processes `public/` after `npx quartz build`. It is not a Quartz plugin.
+**Why:** v5 plugins each live in their own repo, which is a lot of overhead for one site-specific step. A separate package also keeps Quartz's `package.json` untouched (D-010).
+**Consequences:** CI runs two build commands. Running `npx quartz build --serve` locally previews content without the PWA; `npm --prefix pwa run preview` serves the full build.
+
+## D-012 · All assets served from our own origin; CI fails on third-party URLs
+**Date:** 2026-10-23 · **Status:** Accepted
+
+**Decision:**
+- Fonts are self-hosted (`quartz-fonts` `fontOrigin: selfHosted`).
+- d3, pixi.js (graph view) and KaTeX (math) are installed from npm at pinned versions and served from the site, replacing Quartz's CDN URLs.
+- The build fails if any known CDN origin remains in the output.
+- Mermaid is disabled: converted DOCX/PPTX files don't contain diagrams, and its ESM build loads dozens of chunks.
+
+**Why:** Anything loaded from a third party at runtime breaks offline. Pinned npm packages give lockfile integrity checks and Dependabot updates.
+**Consequences:** About 1.2 MB of libraries are precached even on pages that don't use them, which is acceptable within the budget. If a Quartz upgrade adds a new CDN URL, the build fails until it's added to `pwa/config.mjs`.
+
+## D-013 · Patch plugin output we can't configure, and fail loudly when a patch stops matching
+**Date:** 2026-10-23 · **Status:** Accepted
+
+**Decision:** `pwa/config.mjs` holds exact find/replace patches applied to Quartz's emitted JS. The build fails if any patch no longer matches. Current patches:
+- search ignores accents ("funcao" finds "função");
+- the search "no results" text is in Portuguese.
+
+The post-build step also fixes plugins that emit root-absolute `/static/` links ignoring the base path (`quartz-fonts`).
+**Why:** These are bugs or gaps in upstream plugins that matter for a Portuguese site served from a subpath.
+**Consequences:** Every precached file gets a content revision, since patched files keep their hashed names. These fixes are good candidates for upstream PRs; once upstream fixes them, the patches can be removed.
+
+## D-014 · Show tags, hide the properties panel; Portuguese UI labels
+**Date:** 2026-10-23 · **Status:** Accepted
+
+**Decision:** Hide the note-properties panel and show tags with `tag-list`. Breadcrumb root is "Início". Folders get an `index.md` with a Portuguese title.
+**Why:** The properties panel title is hardcoded in English and shows metadata (such as aliases) that students don't need.
