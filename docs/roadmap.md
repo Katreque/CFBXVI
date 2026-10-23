@@ -22,6 +22,7 @@
 - File naming for notes: ` - ` in titles becomes `---` in URLs. Pick a convention on the first real section.
 - One note per section, or split long sections by topic? Decide on the first real section.
 - `gh` CLI isn't installed on the ingest PC yet (needed for the PR step in Phase 2).
+- Upstream PRs, so we can drop our patches (D-013): accent folding and i18n for the "no results" text in `quartz-community/search`; base path in `quartz-community/quartz-fonts`; "Properties" label in `note-properties`.
 
 ## Answered
 

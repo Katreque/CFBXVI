@@ -11,7 +11,13 @@ npm --prefix pwa run build     # must run on a fresh Quartz build (it refuses to
 
 1. **Vendors third-party assets** (D-012). Copies pinned d3, pixi.js and KaTeX from `pwa/node_modules` into `public/static/vendor/` and rewrites Quartz's CDN URLs to point there. It also fixes root-absolute `/static/` links that ignore the base path.
 2. **Applies patches** to the emitted JS (D-013): accent-insensitive search and Portuguese "no results" text.
-3. **Guards**: fails if a known CDN origin remains in the output, or if any patch no longer matches.
+3. **Guards** fail the build when something would be missing offline:
+   - a known CDN origin anywhere in HTML/JS/CSS (scripts load libraries from these at runtime);
+   - **any** external asset a page or stylesheet embeds: `img`/`script`/`iframe`/`video`/`audio`/`source` `src`, stylesheet/icon/preload `<link>`, CSS `url()`. This catches, for example, an image hotlinked in a note or a YouTube embed. Plain `<a href>` links are allowed;
+   - a patch that no longer matches;
+   - a file Workbox can't precache (over 10 MB).
+
+   Files in `precacheIgnore` are not checked, since they're never used offline.
 4. **Manifest and icons**: `public/manifest.webmanifest` with `start_url`/`scope`/`id` = base path; icons copied from `pwa/icons/`.
 5. **Injects into every page's `<head>`** the manifest link, theme colors, Apple tags and `static/pwa/client.{js,css}`. Every tag carries `data-persist`, so Quartz's SPA router keeps it across navigations.
 6. **Service worker**: bundles `pwa/src/sw.js` and lets Workbox inject the precache manifest, covering **every file** except `precacheIgnore`, each with a content revision. Fails if the precache exceeds the **30 MB budget**.
@@ -29,6 +35,7 @@ Configuration lives in `pwa/config.mjs`: app name and colors, vendor list, patch
 ## Client behaviour (`pwa/src/client.js`)
 
 - Registers `sw.js` with scope = base path.
+- Decides "first install vs. update" by whether a worker was already **active** at registration. `navigator.serviceWorker.controller` isn't reliable for this: it's null after a hard reload. It also picks up a worker that was already installing before the script ran.
 - First install shows "Conteúdo salvo. O curso já funciona sem internet."
 - When an update is waiting, it shows "Novo conteúdo disponível" with an "Atualizar" button.
 - Checks for updates whenever the app comes back to the foreground. Installed PWAs, especially on iOS, can stay open for days.
@@ -77,5 +84,7 @@ Plan for the move: change `baseUrl` in `quartz.config.yaml` (everything else fol
 - search works offline and ignores accents;
 - unknown pages offline fall back to the 404 page;
 - update flow: a new deploy shows the prompt, and accepting it activates the new worker and reloads.
+
+On failure, CI uploads screenshots and Playwright's page snapshots (`pwa/test-results`). Trace recording is off on purpose: it stalls service worker installation when tests run in parallel.
 
 **Still manual:** install and offline checks on a real iPhone and a real Android phone before each student-facing release. Playwright can't emulate WebKit's install or eviction behaviour.

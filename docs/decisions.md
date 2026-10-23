@@ -108,3 +108,16 @@ The post-build step also fixes plugins that emit root-absolute `/static/` links 
 
 **Decision:** Hide the note-properties panel and show tags with `tag-list`. Breadcrumb root is "Início". Folders get an `index.md` with a Portuguese title.
 **Why:** The properties panel title is hardcoded in English and shows metadata (such as aliases) that students don't need.
+
+## D-015 · Phase 1 code review fixes
+**Date:** 2026-10-23 · **Status:** Accepted · *Refines D-012, D-013*
+
+**Decision:** Fixes from the Phase 1 review:
+- **Update flow:** "first install vs. update" is decided by `reg.active`, not `controller` (null after a hard reload); a worker already installing at registration is tracked too.
+- **Deploys:** only `master` deploys; manual runs on other branches build and test only.
+- **Offline guard:** checks every external asset embedded by pages and stylesheets, not just known CDNs. Files Workbox would skip (over 10 MB) fail the build.
+- **Install toast:** no longer reappears after "Instalar".
+- **Shared base path:** derived in one place (`pwa/site.mjs`) for the build, the preview server and the tests.
+- **Preview server:** hardened against malformed URLs and path traversal.
+
+**Not changed:** search patches still match minified code (D-013). The build fails loudly when they stop matching, and the long-term fix is upstream PRs (see roadmap).

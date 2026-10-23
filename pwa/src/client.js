@@ -79,9 +79,13 @@ function offerInstall() {
         label: "Instalar",
         primary: true,
         onClick: async () => {
-          installPrompt.prompt()
-          await installPrompt.userChoice
+          // A prompt event can only be used once; clear it first so a later offerInstall()
+          // (e.g. the on-load timer) doesn't show the toast again while the dialog is open.
+          const prompt = installPrompt
           installPrompt = null
+          if (!prompt) return
+          await prompt.prompt()
+          await prompt.userChoice
         },
       },
     ])
@@ -109,32 +113,41 @@ addEventListener("appinstalled", () => {
 
 async function registerSW() {
   if (!("serviceWorker" in navigator)) return
-  const hadController = Boolean(navigator.serviceWorker.controller)
   const reg = await navigator.serviceWorker.register(`${BASE}sw.js`, { scope: BASE })
+
+  // "First install" means no worker was active yet. navigator.serviceWorker.controller is not
+  // a reliable signal: it is null after a hard reload even when a worker is active.
+  let firstInstall = !reg.active
 
   const promptUpdate = (worker) =>
     show("update", "Novo conteúdo disponível.", [
       { label: "Atualizar", primary: true, onClick: () => worker.postMessage({ type: "SKIP_WAITING" }) },
     ])
 
-  if (reg.waiting && hadController) promptUpdate(reg.waiting)
+  const onInstalled = (worker) => {
+    if (reg.active) promptUpdate(worker)
+    else show("ready", "Conteúdo salvo. O curso já funciona sem internet.", [], { timeout: 6000 })
+  }
 
-  reg.addEventListener("updatefound", () => {
-    const worker = reg.installing
-    worker?.addEventListener("statechange", () => {
-      if (worker.state !== "installed") return
-      if (navigator.serviceWorker.controller) promptUpdate(worker)
-      else show("ready", "Conteúdo salvo. O curso já funciona sem internet.", [], { timeout: 6000 })
+  const track = (worker) => {
+    if (worker.state === "installed") return onInstalled(worker)
+    worker.addEventListener("statechange", () => {
+      if (worker.state === "installed") onInstalled(worker)
     })
-  })
+  }
+
+  if (reg.waiting && reg.active) promptUpdate(reg.waiting)
+  // The browser may have started installing a new version before this script ran,
+  // in which case "updatefound" has already fired.
+  if (reg.installing) track(reg.installing)
+  reg.addEventListener("updatefound", () => reg.installing && track(reg.installing))
 
   // The first install also fires controllerchange (clientsClaim) and must not reload.
-  // Every later change is an accepted update, even in a page opened before the first install.
-  let controlled = hadController
+  // Every later change is an accepted update.
   let reloading = false
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!controlled) {
-      controlled = true
+    if (firstInstall) {
+      firstInstall = false
       return
     }
     if (reloading) return

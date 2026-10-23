@@ -4,20 +4,13 @@
 //   anything else -> 404.html with status 404
 // Usage: npm --prefix pwa run preview  [-- --port 8080]
 import { createReadStream } from "node:fs"
-import { readFile, stat } from "node:fs/promises"
+import { stat } from "node:fs/promises"
 import http from "node:http"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
-import YAML from "yaml"
+import { basePath, publicDir } from "./site.mjs"
 
-const here = path.dirname(fileURLToPath(import.meta.url))
-const root = path.resolve(here, "..")
-const publicDir = path.join(root, "public")
 const portArg = process.argv.indexOf("--port")
 const port = portArg > -1 ? Number(process.argv[portArg + 1]) : 8080
-
-const { baseUrl } = YAML.parse(await readFile(path.join(root, "quartz.config.yaml"), "utf8")).configuration
-const basePath = `/${baseUrl.replace(/^https?:\/\//, "").split("/").slice(1).join("/")}/`.replace(/\/+/g, "/")
 
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -44,9 +37,14 @@ async function isFile(p) {
 
 async function resolve(urlPath) {
   if (!urlPath.startsWith(basePath)) return null
-  const relPath = decodeURIComponent(urlPath.slice(basePath.length))
+  let relPath
+  try {
+    relPath = decodeURIComponent(urlPath.slice(basePath.length))
+  } catch {
+    return null // malformed percent-encoding
+  }
   const target = path.join(publicDir, relPath)
-  if (!target.startsWith(publicDir)) return null
+  if (target !== publicDir && !target.startsWith(publicDir + path.sep)) return null
   for (const candidate of [target, `${target}.html`, path.join(target, "index.html")]) {
     if (await isFile(candidate)) return candidate
   }

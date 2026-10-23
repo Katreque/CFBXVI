@@ -1,8 +1,7 @@
 // End-to-end offline checks against the built site (run `npx quartz build` and
 // `npm --prefix pwa run build` first). Content-specific paths come from the sample notes.
 import { expect, test } from "@playwright/test"
-
-const BASE = "/CFBXVI/"
+import { basePath as BASE } from "../site.mjs"
 
 async function goOffline(page, context) {
   await page.goto(BASE)
@@ -14,6 +13,15 @@ async function goOffline(page, context) {
     }
   })
   await context.setOffline(true)
+}
+
+// The search button only works once Quartz's scripts have attached their handlers,
+// so retry the click until the search bar opens.
+async function openSearch(page) {
+  await expect(async () => {
+    await page.locator(".search-button").first().click()
+    await expect(page.locator(".search-bar")).toBeVisible({ timeout: 1000 })
+  }).toPass()
 }
 
 test("first visit installs a service worker that controls the page", async ({ page }) => {
@@ -71,14 +79,14 @@ test("no request fails offline (fonts, scripts, graph libraries)", async ({ page
 test("search works offline", async ({ page, context }) => {
   await goOffline(page, context)
   await page.goto(`${BASE}`)
-  await page.locator(".search-button").first().click()
+  await openSearch(page)
   await page.locator(".search-bar").fill("domínio")
   await expect(page.locator(".search-layout")).toContainText("Domínio")
 })
 
 test("search ignores accents", async ({ page }) => {
   await page.goto(BASE)
-  await page.locator(".search-button").first().click()
+  await openSearch(page)
   await page.locator(".search-bar").fill("funcao")
   await expect(page.locator(".search-layout")).toContainText("Função")
 })

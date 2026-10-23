@@ -2,15 +2,13 @@
 //   npm --prefix pwa run build
 // 1. vendors CDN libraries into the site so nothing is fetched from third parties,
 //    and applies the patches listed in config.mjs
-// 2. fails if any third-party asset URL is left (it would break offline)
+// 2. fails if any third-party asset URL is left, or a file can't be precached (offline gaps)
 // 3. writes the web app manifest, icons and client script, and injects them into every page
 // 4. generates the service worker that precaches the whole site
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 import * as esbuild from "esbuild"
 import { injectManifest } from "workbox-build"
-import YAML from "yaml"
 import {
   allowedThirdParty,
   app,
@@ -20,18 +18,33 @@ import {
   vendor,
   vendorDirs,
 } from "./config.mjs"
+import { baseUrl, basePath, publicDir, pwaDir as here } from "./site.mjs"
 
-const here = path.dirname(fileURLToPath(import.meta.url))
-const root = path.resolve(here, "..")
-const publicDir = path.join(root, "public")
 const modules = path.join(here, "node_modules")
 
 // Fail the build if the precache grows past this. See docs/pwa-offline.md (size budget).
 const PRECACHE_BUDGET_BYTES = 30 * 1024 * 1024
+// Larger single files can't be precached; the build fails rather than silently skipping them.
+const MAX_FILE_BYTES = 10 * 1024 * 1024
 
-const quartzConfig = YAML.parse(await readFile(path.join(root, "quartz.config.yaml"), "utf8"))
-const baseUrl = quartzConfig.configuration.baseUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")
-const basePath = `/${baseUrl.split("/").slice(1).join("/")}/`.replace(/\/+/g, "/")
+// Absolute http(s) URLs that the browser would fetch as part of rendering a page:
+// embedded media/scripts/frames, stylesheets/icons/preloads, and CSS url(...).
+// Plain <a href> links are fine: following them offline is expected to fail.
+function externalAssetUrls(text) {
+  const urls = []
+  for (const [, url] of text.matchAll(
+    /<(?:img|script|iframe|video|audio|source|track|embed)\b[^>]*?\ssrc="(https?:\/\/[^"]+)"/g,
+  )) {
+    urls.push(url)
+  }
+  for (const [tag] of text.matchAll(/<link\b[^>]*>/g)) {
+    const rel = tag.match(/\srel="([^"]+)"/)?.[1] ?? ""
+    const href = tag.match(/\shref="(https?:\/\/[^"]+)"/)?.[1]
+    if (href && /\b(stylesheet|preload|modulepreload|icon|manifest)\b/.test(rel)) urls.push(href)
+  }
+  for (const [, url] of text.matchAll(/url\(\s*["']?(https?:\/\/[^"')\s]+)/g)) urls.push(url)
+  return urls
+}
 
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true })
@@ -42,6 +55,10 @@ async function walk(dir) {
 }
 
 const rel = (file) => path.relative(publicDir, file).split(path.sep).join("/")
+
+// precacheIgnore entries are exact paths or "dir/**".
+const isPrecacheIgnored = (file) =>
+  precacheIgnore.some((p) => (p.endsWith("/**") ? rel(file).startsWith(p.slice(0, -2)) : rel(file) === p))
 
 try {
   await stat(path.join(publicDir, "index.html"))
@@ -92,10 +109,19 @@ for (const file of textFiles) {
   if (file.endsWith(".css")) text = text.replaceAll(`https://${baseUrl}/`, basePath)
   if (text !== original) await writeFile(file, text)
 
+  // Two checks: known CDN origins anywhere (scripts load libraries dynamically from them),
+  // and any external asset a page or stylesheet embeds (e.g. an image hotlinked in a note).
+  // Files we don't precache (e.g. the unused giscus comment styles) aren't used offline.
+  if (isPrecacheIgnored(file)) continue
   let checked = text
   for (const prefix of allowedThirdParty) checked = checked.replaceAll(prefix, "")
   for (const origin of forbiddenOrigins) {
     if (checked.includes(origin)) leftovers.push(`${rel(file)}: ${origin}`)
+  }
+  if (!file.endsWith(".js")) {
+    for (const url of externalAssetUrls(text)) {
+      if (!allowedThirdParty.some((p) => url.startsWith(p))) leftovers.push(`${rel(file)}: ${url}`)
+    }
   }
 }
 
@@ -111,8 +137,10 @@ if (missingPatches.length > 0) {
 
 if (leftovers.length > 0) {
   console.error("Third-party asset URLs left in the build (these break offline use):")
-  for (const l of leftovers) console.error(`  ${l}`)
-  console.error("Add them to `vendor` in pwa/config.mjs.")
+  for (const l of [...new Set(leftovers)]) console.error(`  ${l}`)
+  console.error(
+    "Download the asset into content/ (notes) or add it to `vendor` in pwa/config.mjs (Quartz).",
+  )
   process.exit(1)
 }
 
@@ -200,11 +228,17 @@ const { count, size, warnings } = await injectManifest({
   globIgnores: precacheIgnore,
   // Every file gets a content revision, including hash-named ones: our patches change
   // their content after Quartz computed the name.
-  maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+  maximumFileSizeToCacheInBytes: MAX_FILE_BYTES,
 })
 await rm(path.join(here, ".tmp"), { recursive: true, force: true })
 
-for (const w of warnings) console.warn(`workbox: ${w}`)
+// Workbox only warns about files it leaves out (e.g. too large); any of those would be
+// missing offline, so treat them as errors.
+if (warnings.length > 0) {
+  console.error("Some files were left out of the precache and would be missing offline:")
+  for (const w of warnings) console.error(`  ${w}`)
+  process.exit(1)
+}
 console.log(`PWA: precaching ${count} files, ${(size / 1024 / 1024).toFixed(2)} MB (base ${basePath})`)
 
 if (size > PRECACHE_BUDGET_BYTES) {

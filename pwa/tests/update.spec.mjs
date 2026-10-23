@@ -1,8 +1,7 @@
 // Simulates a new deploy for a returning visitor: a changed sw.js must surface the update
 // prompt, and accepting it must hand control to the new service worker and reload.
 import { expect, test } from "@playwright/test"
-
-const BASE = "/CFBXVI/"
+import { basePath as BASE } from "../site.mjs"
 
 test("a new deploy shows the update prompt and applies it", async ({ page, context }) => {
   let deploy = 1

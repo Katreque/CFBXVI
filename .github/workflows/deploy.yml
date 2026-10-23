@@ -61,13 +61,14 @@ jobs:
           retention-days: 7
 
       - name: Upload site
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
   deploy:
-    if: github.event_name != 'pull_request'
+    # Only master reaches production; manual runs on other branches just build and test.
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     permissions:
