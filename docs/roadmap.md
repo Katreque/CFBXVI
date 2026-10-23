@@ -2,7 +2,7 @@
 
 | Phase | Deliverable | Done when | Status |
 |---|---|---|---|
-| **1. Site + PWA** | Quartz v5 set up, pt-BR, a few sample notes, manifest, service worker, update prompt, iOS install guide, Pages deploy workflow | Installed on a real iPhone and Android phone, browsable in airplane mode | **Built and tested in CI-equivalent runs; waiting on first deploy and real-device check** |
+| **1. Site + PWA** | Quartz v5 set up, pt-BR, a few sample notes, manifest, service worker, update prompt, iOS install guide, Pages deploy workflow | Installed on a real iPhone and Android phone, browsable in airplane mode | **Deployed; waiting on real-device check** |
 | **2. Ingest pipeline** | Docling extraction (DOCX/PDF/PPTX), `glossary.yml`, linker, `sources.lock`, `/ingest` skill, PR flow | One real section ingested and reviewed through a PR | Not started |
 | **3. Hardening** | Lighthouse CI, image optimisation, Dependabot | CI checks green on every PR | Partly done: offline Playwright tests and the precache size budget already run in CI |
 | **4. Bulk ingest** | All ~20 sections ingested; glossary reviewed with the teacher | Full course available offline | Not started |
@@ -13,7 +13,7 @@
 - [x] PWA post-build step: vendoring, guards, manifest, icons, service worker, client UI
 - [x] Offline end-to-end tests (18 passing locally)
 - [x] Deploy workflow (build → PWA → tests → Pages)
-- [ ] Enable Pages with "GitHub Actions" as the source, then push
+- [x] Pages enabled and first deploy green (2026-10-23); offline smoke test against production passed
 - [ ] Real-device check: install on iPhone and Android, airplane mode, update flow
 - [ ] Final app name, icon and colors (currently placeholders: "CFBXVI", text icon)
 
