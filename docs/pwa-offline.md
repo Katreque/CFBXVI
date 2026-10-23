@@ -36,11 +36,15 @@ Configuration lives in `pwa/config.mjs`: app name and colors, vendor list, patch
 
 - Registers `sw.js` with scope = base path.
 - Decides "first install vs. update" by whether a worker was already **active** at registration. `navigator.serviceWorker.controller` isn't reliable for this: it's null after a hard reload. It also picks up a worker that was already installing before the script ran.
-- First install shows "Conteúdo salvo. O curso já funciona sem internet."
+- **First visit shows one message, never two.** The install offer waits until the course has finished downloading, then appears in the same toast as the "saved" message:
+  - installable (Android/Chromium): "Pronto! O curso foi salvo neste aparelho. Instale o app para abrir direto da tela inicial, mesmo sem internet." [Agora não] [Instalar]
+  - iOS: "Pronto! O curso foi salvo neste aparelho. Para abrir sem internet, toque em Compartilhar e depois em “Adicionar à Tela de Início”." [Entendi]
+  - already installed, or can't install: "Pronto! O curso foi salvo neste aparelho. Ele funciona mesmo sem internet." (hides after 6 s)
+- Returning visitors who haven't installed get only the install offer, about 1.5 s after load.
 - When an update is waiting, it shows "Novo conteúdo disponível" with an "Atualizar" button.
 - Checks for updates whenever the app comes back to the foreground. Installed PWAs, especially on iOS, can stay open for days.
 - Calls `navigator.storage.persist()`.
-- **Install prompt:** Android/Chromium get an "Instalar" button (`beforeinstallprompt`). iOS gets the instruction to tap Share → "Adicionar à Tela de Início". "Agora não"/"Entendi" hides it for 14 days (stored in `localStorage`, best-effort).
+- **Install offer:** Android/Chromium get an "Instalar" button (`beforeinstallprompt`); iOS gets the Share → "Adicionar à Tela de Início" instruction. "Agora não"/"Entendi" hides it for 14 days (stored in `localStorage`, best-effort).
 - The UI uses Quartz's CSS variables, so it follows light and dark mode, and it re-attaches after each SPA navigation.
 
 ## Size
@@ -83,7 +87,8 @@ Plan for the move: change `baseUrl` in `quartz.config.yaml` (everything else fol
 - no request fails offline on a page with the graph view (fonts, d3, pixi);
 - search works offline and ignores accents;
 - unknown pages offline fall back to the 404 page;
-- update flow: a new deploy shows the prompt, and accepting it activates the new worker and reloads.
+- update flow: a new deploy shows the prompt, and accepting it activates the new worker and reloads;
+- first-visit onboarding (default, iOS, installable): exactly one toast, and the install offer doesn't come back after "Instalar".
 
 On failure, CI uploads screenshots and Playwright's page snapshots (`pwa/test-results`). Trace recording is off on purpose: it stalls service worker installation when tests run in parallel.
 

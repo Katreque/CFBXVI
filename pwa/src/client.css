@@ -28,9 +28,14 @@
   font-size: 0.95rem;
 }
 
+/* Text on its own line; buttons grouped below it, right-aligned. */
 #pwa-ui .pwa-toast p {
-  flex: 1 1 14rem;
+  flex: 1 1 100%;
   margin: 0;
+}
+
+#pwa-ui .pwa-toast p + button {
+  margin-left: auto;
 }
 
 #pwa-ui .pwa-toast button {

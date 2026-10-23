@@ -69,11 +69,25 @@ const isIOS = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
 
+// First-visit onboarding is a single message. While the course is still downloading the
+// install offer waits; once it's saved, "saved" and "install" are shown together so the
+// student reads one message that explains both what happened and what to do next.
+let downloading = false
+let justSaved = false
+const SAVED = "Pronto! O curso foi salvo neste aparelho."
+
+const canOfferInstall = () =>
+  !isStandalone() && !readDismissed() && (Boolean(installPrompt) || isIOS())
+
 function offerInstall() {
-  if (isStandalone() || readDismissed()) return
+  if (downloading || !canOfferInstall()) return
+  root?.querySelector('[data-pwa="ready"]')?.remove()
   const later = { label: "Agora não", onClick: writeDismissed }
   if (installPrompt) {
-    show("install", "Instale o app para acessar o curso sem internet.", [
+    const text = justSaved
+      ? `${SAVED} Instale o app para abrir direto da tela inicial, mesmo sem internet.`
+      : "Instale o app para abrir o curso direto da tela inicial, mesmo sem internet."
+    show("install", text, [
       later,
       {
         label: "Instalar",
@@ -90,12 +104,19 @@ function offerInstall() {
       },
     ])
   } else if (isIOS()) {
-    show(
-      "install",
-      "Para acessar o curso sem internet, toque em Compartilhar e depois em “Adicionar à Tela de Início”.",
-      [{ ...later, label: "Entendi" }],
-    )
+    const how = "toque em Compartilhar e depois em “Adicionar à Tela de Início”."
+    const text = justSaved
+      ? `${SAVED} Para abrir sem internet, ${how}`
+      : `Para acessar o curso sem internet, ${how}`
+    show("install", text, [{ ...later, label: "Entendi" }])
   }
+}
+
+function onFirstSave() {
+  downloading = false
+  justSaved = true
+  if (canOfferInstall()) offerInstall()
+  else show("ready", `${SAVED} Ele funciona mesmo sem internet.`, [], { timeout: 6000 })
 }
 
 addEventListener("beforeinstallprompt", (event) => {
@@ -112,12 +133,14 @@ addEventListener("appinstalled", () => {
 // --- service worker ---
 
 async function registerSW() {
-  if (!("serviceWorker" in navigator)) return
+  if (!("serviceWorker" in navigator)) throw new Error("service workers not supported")
   const reg = await navigator.serviceWorker.register(`${BASE}sw.js`, { scope: BASE })
 
   // "First install" means no worker was active yet. navigator.serviceWorker.controller is not
   // a reliable signal: it is null after a hard reload even when a worker is active.
   let firstInstall = !reg.active
+  downloading = firstInstall
+  if (!firstInstall) setTimeout(offerInstall, 1500)
 
   const promptUpdate = (worker) =>
     show("update", "Novo conteúdo disponível.", [
@@ -126,7 +149,7 @@ async function registerSW() {
 
   const onInstalled = (worker) => {
     if (reg.active) promptUpdate(worker)
-    else show("ready", "Conteúdo salvo. O curso já funciona sem internet.", [], { timeout: 6000 })
+    else onFirstSave()
   }
 
   const track = (worker) => {
@@ -172,7 +195,12 @@ async function requestPersistence() {
 if (!window.__pwaInit) {
   window.__pwaInit = true
   document.addEventListener("nav", mount)
-  registerSW().catch((err) => console.error("[pwa] service worker registration failed", err))
+  // The install offer is scheduled by registerSW (after the first download, or shortly after
+  // load for returning visitors); without service worker support, offer it after load.
+  registerSW().catch((err) => {
+    console.error("[pwa] service worker registration failed", err)
+    downloading = false
+    setTimeout(offerInstall, 1500)
+  })
   requestPersistence()
-  addEventListener("load", () => setTimeout(offerInstall, 1500))
 }
