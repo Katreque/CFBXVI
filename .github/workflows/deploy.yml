@@ -36,10 +36,10 @@ jobs:
           npm ci --prefix pwa
 
       - name: Install Quartz plugins
-        run: npx quartz plugin install
+        run: node quartz/bootstrap-cli.mjs plugin install
 
       - name: Build site
-        run: npx quartz build
+        run: node quartz/bootstrap-cli.mjs build
 
       - name: Add PWA (vendor assets, manifest, service worker)
         run: npm --prefix pwa run build
