@@ -44,18 +44,24 @@ jobs:
       - name: Add PWA (vendor assets, manifest, service worker)
         run: npm --prefix pwa run build
 
-      # Chromium is cached per Playwright version, and its system packages come with the
-      # runner image (which ships Chrome). `--with-deps` ran apt, which pulled fonts at
-      # ~50 kB/s from the Ubuntu mirror and could take ten minutes.
-      - name: Get Playwright version
+      # Chromium is cached per runner image and Playwright version. Its system packages come
+      # with the runner image (which ships Chrome): `--with-deps` ran apt, which pulled fonts
+      # at ~50 kB/s from the Ubuntu mirror and could take ten minutes.
+      - name: Playwright cache key
         id: playwright
-        run: echo "version=$(node -p "require('./pwa/package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+        run: |
+          version=$(node -p "require('./pwa/package-lock.json').packages['node_modules/@playwright/test']?.version")
+          if [ -z "$version" ] || [ "$version" = undefined ]; then
+            echo "::error::@playwright/test not found in pwa/package-lock.json"; exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "image=${ImageOS:?runner image name not set}" >> "$GITHUB_OUTPUT"
 
       - name: Cache Playwright browser
         uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+          key: playwright-${{ steps.playwright.outputs.image }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
 
       - name: Install Playwright browser
         working-directory: pwa

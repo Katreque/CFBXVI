@@ -1,6 +1,9 @@
-# Dependency update PRs. Every pin in the repo is exact, so these PRs are the only way
-# versions move, and CI tests each one before merge. Minor and patch updates are grouped
-# per ecosystem to keep the PR count low.
+# Dependency update PRs; CI tests each one before merge. Lockfiles pin every installed
+# version, so nothing moves unless one of these PRs moves it. Minor and patch updates are
+# grouped to keep the PR count low; each major gets its own PR.
+#
+# Ignore rules below use `update-types`, which only filters version updates: Dependabot
+# security updates still open for every dependency.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -9,17 +12,24 @@ updates:
       interval: weekly
     groups:
       actions:
-        patterns: ["*"]
+        update-types: [minor, patch]
 
-  # Quartz (vendored, D-010). Majors come with a Quartz upgrade, not on their own.
+  # Quartz (vendored, D-010). Its package.json stays untouched (D-011), so only the
+  # lockfile moves, within Quartz's own ranges. Majors come with a Quartz upgrade.
+  # Plugins are grouped apart: a plugin release can break the D-013 search patches on
+  # purpose, and that shouldn't hold up unrelated bumps.
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+    versioning-strategy: lockfile-only
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
     groups:
+      quartz-plugins:
+        patterns: ["@quartz-community/*"]
+        update-types: [minor, patch]
       quartz:
         update-types: [minor, patch]
 
@@ -32,6 +42,10 @@ updates:
       interval: weekly
     ignore:
       - dependency-name: katex
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
       - dependency-name: d3
         update-types: ["version-update:semver-major"]
       - dependency-name: pixi.js

@@ -81,7 +81,7 @@ Each entry records what was decided, why, and its consequences. Supersede an ent
 **Consequences:** CI runs two build commands. Running `npx quartz build --serve` locally previews content without the PWA; `npm --prefix pwa run preview` serves the full build.
 
 ## D-012 · All assets served from our own origin; CI fails on third-party URLs
-**Date:** 2026-10-23 · **Status:** Accepted
+**Date:** 2026-10-23 · **Status:** Accepted · *Refined by D-020*
 
 **Decision:**
 - Fonts are self-hosted (`quartz-fonts` `fontOrigin: selfHosted`).
@@ -89,7 +89,7 @@ Each entry records what was decided, why, and its consequences. Supersede an ent
 - The build fails if any known CDN origin remains in the output.
 - Mermaid is disabled: converted DOCX/PPTX files don't contain diagrams, and its ESM build loads dozens of chunks.
 
-**Why:** Anything loaded from a third party at runtime breaks offline. Pinned npm packages give lockfile integrity checks and Dependabot updates.
+**Why:** Anything loaded from a third party at runtime breaks offline. Pinned npm packages give lockfile integrity checks and Dependabot updates (security updates only for KaTeX, and no majors for d3 and pixi.js; see D-020).
 **Consequences:** About 1.2 MB of libraries are precached even on pages that don't use them, which is acceptable within the budget. If a Quartz upgrade adds a new CDN URL, the build fails until it's added to `pwa/config.mjs`.
 
 ## D-013 · Patch plugin output we can't configure, and fail loudly when a patch stops matching
@@ -169,6 +169,6 @@ The post-build step also fixes plugins that emit root-absolute `/static/` links 
 ## D-020 · Dependabot for updates, cached Playwright browser, pinned runner
 **Date:** 2026-10-26 · **Status:** Accepted
 
-**Decision:** Dependabot opens weekly PRs for GitHub Actions, npm (Quartz at `/`, PWA at `/pwa`) and pip (`/pipeline`), with minor and patch updates grouped per ecosystem. Majors are ignored for the vendored Quartz dependencies. In `/pwa`, katex is never updated and d3 and pixi.js get no majors: they replace CDN URLs that Quartz emits with those versions (`pwa/config.mjs`). CI caches Playwright's Chromium per Playwright version, and jobs run on `ubuntu-24.04` instead of `ubuntu-latest`.
-**Why:** Every version is pinned exactly, so nothing moves unless a PR moves it, and CI tests each one. Quartz majors belong to a Quartz upgrade (D-010). Installing Chromium with `--with-deps` took about 10 of the build's 11 minutes, almost all of it apt downloading fonts from a slow Ubuntu mirror. `ubuntu-latest` moved to a new Ubuntu release on its own in October 2026, and an OS change should be a reviewed PR.
-**Consequences:** Docling and Pillow updates are not exercised by CI (D-002): run `pytest pipeline/tests` locally before merging them. CI no longer runs apt: Chromium's system libraries come from the runner image, which ships Chrome. If an image update drops one, the offline tests fail and the fix is to add `--with-deps` back. Moving to a newer Ubuntu is a manual one-line change.
+**Decision:** Dependabot opens weekly PRs for GitHub Actions, npm (Quartz at `/`, PWA at `/pwa`) and pip (`/pipeline`). Minor and patch updates are grouped per ecosystem; each major gets its own PR. At `/`, Dependabot updates only the lockfile (`versioning-strategy: lockfile-only`), never Quartz's `package.json`, ignores majors, and groups `@quartz-community/*` plugins apart from the rest. In `/pwa`, katex gets no version updates and d3 and pixi.js get no majors: they replace CDN URLs that Quartz emits with those versions (`pwa/config.mjs`). Ignore rules use `update-types`, which doesn't apply to security updates, so those still open for every dependency. CI caches Playwright's Chromium per runner image, architecture and Playwright version, and jobs run on `ubuntu-24.04` instead of `ubuntu-latest`.
+**Why:** Lockfiles pin every installed version, so nothing moves unless a PR moves it, and CI tests each one. Quartz's `package.json` stays as upstream ships it, so Quartz upgrades apply cleanly (D-010, D-011), and Quartz majors belong to a Quartz upgrade. A plugin release can break the search patches on purpose (D-013), and in its own group that doesn't block unrelated bumps. One major per PR means a breaking one doesn't hold up the others. Installing Chromium with `--with-deps` took about 10 of the build's 11 minutes, almost all of it apt downloading fonts from a slow Ubuntu mirror. `ubuntu-latest` moved to a new Ubuntu release on its own in October 2026, and an OS change should be a reviewed PR.
+**Consequences:** Docling and Pillow updates are not exercised by CI (D-002): run `pytest pipeline/tests` locally before merging them. CI no longer runs apt: Chromium's system libraries come from the runner image, which ships Chrome. If an image update drops one, the offline tests fail and the fix is to add `--with-deps` back. Moving to a newer Ubuntu is a manual one-line change; the cache key includes the image, so it downloads fresh browsers. The cache-key step fails if it can't read the Playwright version, rather than caching under a constant key.
