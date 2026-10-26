@@ -44,27 +44,22 @@ jobs:
       - name: Add PWA (vendor assets, manifest, service worker)
         run: npm --prefix pwa run build
 
-      # Chromium is cached per Playwright version; downloading it took most of the build time.
+      # Chromium is cached per Playwright version, and its system packages come with the
+      # runner image (which ships Chrome). `--with-deps` ran apt, which pulled fonts at
+      # ~50 kB/s from the Ubuntu mirror and could take ten minutes.
       - name: Get Playwright version
         id: playwright
         run: echo "version=$(node -p "require('./pwa/package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
 
       - name: Cache Playwright browser
-        id: playwright-cache
         uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
 
       - name: Install Playwright browser
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: pwa
-        run: npx playwright install --with-deps chromium
-
-      - name: Install Playwright system dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        working-directory: pwa
-        run: npx playwright install-deps chromium
+        run: npx playwright install chromium # no-op on a cache hit
 
       - name: Offline tests
         working-directory: pwa
