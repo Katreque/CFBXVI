@@ -164,6 +164,38 @@ def test_check_mode_writes_nothing_and_exits_1(tmp_path):
     assert not (tmp_path / "conceitos").exists()
 
 
+@pytest.mark.parametrize(
+    "yaml_text, message",
+    [
+        ("- concept:\n  aliases: [x]\n", "an entry has no 'concept'"),
+        ("- concept: Função\n  aliases: [~]\n", "empty alias"),
+        ("- Função\n", "aren't 'concept: ...' mappings"),
+        ("concept: Função\n", "must be a list"),
+    ],
+)
+def test_malformed_glossary_is_a_validation_error(tmp_path, capsys, yaml_text, message):
+    glossary = tmp_path / "glossary.yml"
+    glossary.write_text(yaml_text, encoding="utf-8")
+    assert link.main(["--content", str(tmp_path), "--glossary", str(glossary)]) == 2
+    assert message in capsys.readouterr().err
+    assert not (tmp_path / "conceitos").exists()
+
+
+def test_crlf_and_empty_frontmatter_are_parsed():
+    assert notes.split("---\r\ntitle: X\r\n---\r\nA função.\r\n") == ({"title": "X"}, "A função.\n")
+    assert notes.split("---\n---\nTexto.\n") == ({}, "Texto.\n")
+
+
+def test_crlf_note_keeps_its_frontmatter_when_linked(tmp_path):
+    note = tmp_path / "secoes" / "01.md"
+    note.parent.mkdir(parents=True)
+    note.write_bytes("---\r\ntitle: A função\r\ntags: [secao]\r\n---\r\nA função.\r\n".encode())
+    link.run(tmp_path, [FUNCAO], write=True)
+    meta, body = notes.read(note)
+    assert meta == {"title": "A função", "tags": ["secao", "matematica/funcoes"]}
+    assert body == "A [[Função|função]].\n"
+
+
 def test_invalid_glossary_exits_2_without_writing(tmp_path):
     section = write_note(tmp_path, "secoes/01.md", "A função.\n")
     glossary = tmp_path / "glossary.yml"

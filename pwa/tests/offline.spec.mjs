@@ -1,5 +1,5 @@
 // End-to-end offline checks against the built site (run `npx quartz build` and
-// `npm --prefix pwa run build` first). Content-specific paths come from the sample notes.
+// `npm --prefix pwa run build` first). Content-specific paths come from the real course pages (Eclesiologia, D-018).
 import { expect, test } from "@playwright/test"
 import { basePath as BASE } from "../site.mjs"
 

@@ -10,12 +10,15 @@ REPO = Path(__file__).resolve().parent.parent
 CONTENT = REPO / "content"
 CONCEPTS = CONTENT / "conceitos"
 ATTACHMENTS = CONTENT / "attachments"
+WORK = REPO / "sources" / "_work"  # raw extractions, waiting to be curated
 
 
 def split(text: str) -> tuple[dict, str]:
-    """Return (frontmatter, body). A note without frontmatter gets an empty dict."""
+    """Return (frontmatter, body). A note without frontmatter gets an empty dict.
+    CRLF line endings are normalised, so the body comes back with LF."""
+    text = text.replace("\r\n", "\n")
     if text.startswith("---\n"):
-        end = text.find("\n---\n", 4)
+        end = text.find("\n---\n", 3)  # from 3, so empty frontmatter ("---\n---\n") is found too
         if end != -1:
             return yaml.safe_load(text[4:end]) or {}, text[end + 5 :]
         if text.endswith("\n---"):

@@ -4,7 +4,7 @@ import { setCatchHandler, setDefaultHandler } from "workbox-routing"
 import { NetworkOnly } from "workbox-strategies"
 
 // The whole site is precached; the manifest is injected at build time.
-// cleanURLs maps "/secoes/nota" to "secoes/nota.html", matching how GitHub Pages serves Quartz output.
+// cleanURLs maps "/conceitos/povo-de-deus" to "conceitos/povo-de-deus.html", matching how GitHub Pages serves Quartz output.
 precacheAndRoute(self.__WB_MANIFEST, {
   cleanURLs: true,
   directoryIndex: "index.html",

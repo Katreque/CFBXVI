@@ -50,16 +50,30 @@ class Concept:
         return [self.name, *self.aliases]
 
 
+class GlossaryError(ValueError):
+    """glossary.yml isn't a list of concept mappings."""
+
+
+def _text(value) -> str:
+    # A YAML key with no value loads as None, which must not become the text "None".
+    return "" if value is None else str(value).strip()
+
+
 def load_glossary(path: Path = GLOSSARY) -> list[Concept]:
     if not path.exists():
         return []
     entries = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+    if not isinstance(entries, list):
+        raise GlossaryError("the file must be a list of entries (each starting with '- concept:')")
+    bad = [f"entry {i} ({e!r})" for i, e in enumerate(entries, 1) if not isinstance(e, dict)]
+    if bad:
+        raise GlossaryError(f"these entries aren't 'concept: ...' mappings: {', '.join(bad)}")
     return [
         Concept(
-            name=str(e.get("concept", "")).strip(),
-            aliases=[str(a).strip() for a in notes.as_list(e.get("aliases"))],
-            tags=[str(t).strip() for t in notes.as_list(e.get("tags"))],
-            description=str(e.get("description") or "").strip(),
+            name=_text(e.get("concept")),
+            aliases=[_text(a) for a in notes.as_list(e.get("aliases"))],
+            tags=[_text(t) for t in notes.as_list(e.get("tags"))],
+            description=_text(e.get("description")),
         )
         for e in entries
     ]
@@ -200,7 +214,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--glossary", type=Path, default=GLOSSARY, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
 
-    glossary = load_glossary(args.glossary)
+    try:
+        glossary = load_glossary(args.glossary)
+    except GlossaryError as e:
+        print(f"glossary.yml has problems:\n  - {e}", file=sys.stderr)
+        return 2
     errors = validate(glossary, args.content)
     if errors:
         print("glossary.yml has problems:", *(f"  - {e}" for e in errors), sep="\n", file=sys.stderr)

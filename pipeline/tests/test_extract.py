@@ -31,6 +31,43 @@ def test_to_webp_resizes_and_drops_tiny_images():
     assert (big.format, big.size) == ("WEBP", (1200, 600))
 
 
+def test_to_webp_converts_palette_images_before_resizing():
+    palette = Image.new("RGB", (2400, 200), (10, 120, 200)).convert("P")
+    out = Image.open(io.BytesIO(extract.to_webp(palette)))
+    assert out.size == (1200, 100)
+
+
+class _Proxy:
+    """A Docling document whose Markdown export drops the image placeholders."""
+
+    def __init__(self, doc):
+        self._doc = doc
+
+    def __getattr__(self, name):
+        return getattr(self._doc, name)
+
+    def export_to_markdown(self, **kwargs):
+        return self._doc.export_to_markdown(**kwargs).replace(extract.PLACEHOLDER, "")
+
+
+def test_failed_extraction_writes_no_attachments(tmp_path, convert):
+    document = docx.Document()
+    document.add_paragraph("Texto.")
+    document.add_picture(png())
+    source = tmp_path / "s.docx"
+    document.save(source)
+
+    class BrokenConvert:
+        def convert(self, path):
+            result = convert.convert(path)
+            return type("Result", (), {"document": _Proxy(result.document)})()
+
+    with pytest.raises(RuntimeError, match="0 image placeholders but 1 pictures"):
+        extract.extract(source, tmp_path / "work", tmp_path / "attachments", BrokenConvert())
+    assert not (tmp_path / "attachments").exists()
+    assert not (tmp_path / "work").exists()
+
+
 def test_docx(tmp_path, convert):
     document = docx.Document()
     document.add_heading("Introdução às funções", level=1)

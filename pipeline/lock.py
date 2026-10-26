@@ -39,21 +39,33 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def collect(paths: list[Path]) -> tuple[list[Path], list[tuple[Path, str]]]:
-    """Expand folders and pick the files to ingest. A PDF is skipped when a DOCX with the
-    same name sits next to it (D-005). Returns (files, [(skipped file, reason)])."""
+def collect(paths: list[Path], work: Path = notes.WORK) -> tuple[list[Path], list[tuple[Path, str]]]:
+    """Expand folders and pick the files to ingest. A PDF is replaced by the DOCX with the
+    same name when one sits next to it (D-005). Raw extractions under `work` are ignored.
+    Returns (files, [(skipped file, reason)])."""
+    work = work.resolve()
     found: list[Path] = []
+    skipped: list[tuple[Path, str]] = []
     for p in paths:
-        found += sorted(f for f in p.rglob("*") if f.is_file()) if p.is_dir() else [p]
-    files, skipped = [], []
+        if p.is_dir():
+            found += sorted(f for f in p.rglob("*") if f.is_file() and not f.resolve().is_relative_to(work))
+        elif p.is_file():
+            found.append(p)
+        else:
+            skipped.append((p, "not found"))
+    files: list[Path] = []
     for f in found:
-        if f.name.startswith("~$") or "_work" in f.parts:  # Office lock files, raw extractions
+        if f.name.startswith("~$"):  # Office lock files
             continue
         if f.suffix.lower() not in FORMATS:
             skipped.append((f, f"unsupported format {f.suffix or '(none)'}"))
-        elif f.suffix.lower() == ".pdf" and any(f.with_suffix(s).exists() for s in (".docx", ".DOCX")):
-            skipped.append((f, "the DOCX with the same name is used instead"))
-        else:
+            continue
+        if f.suffix.lower() == ".pdf":
+            docx = next((d for d in (f.with_suffix(".docx"), f.with_suffix(".DOCX")) if d.is_file()), None)
+            if docx is not None:
+                skipped.append((f, f"{docx.name} is used instead"))
+                f = docx
+        if f not in files:
             files.append(f)
     return files, skipped
 
@@ -72,6 +84,8 @@ def status(files: list[Path], entries: dict) -> list[tuple[Path, str]]:
 
 
 def record(entries: dict, source: Path, note_paths: list[str], attachments: list[str], today: str) -> dict:
+    # Always "/": paths typed or tab-completed on Windows come with "\".
+    note_paths = [n.replace("\\", "/") for n in note_paths]
     entry = {"sha256": sha256(source), "ingested": today, "notes": sorted(note_paths)}
     if attachments:
         entry["attachments"] = sorted(attachments)
@@ -99,7 +113,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{'skipped':<10} {f} ({reason})")
         return 0
 
-    missing = [n for n in args.notes if not (notes.CONTENT / n).exists()]
+    if not args.source.is_file():
+        print(f"source file not found: {args.source}", file=sys.stderr)
+        return 2
+    missing = [n for n in args.notes if not (notes.CONTENT / n.replace("\\", "/")).exists()]
     if missing:
         print("these notes don't exist under content/:", *missing, sep="\n  ", file=sys.stderr)
         return 2

@@ -20,7 +20,6 @@ from pathlib import Path
 import notes
 from lock import FORMATS
 
-WORK = notes.REPO / "sources" / "_work"
 MAX_WIDTH = 1200  # px; enough for a phone screen at 2-3x
 MIN_SIDE = 48  # px; anything smaller is a bullet, icon or rule, not content
 WEBP_QUALITY = 80
@@ -37,10 +36,11 @@ def to_webp(image) -> bytes | None:
     """Resize and encode an image as WebP. Returns None for images too small to be content."""
     if min(image.size) < MIN_SIDE:
         return None
-    if image.width > MAX_WIDTH:
-        image = image.resize((MAX_WIDTH, round(image.height * MAX_WIDTH / image.width)))
+    # Convert first: Pillow can only resize palette and 1-bit images with nearest-neighbour.
     if image.mode not in ("RGB", "RGBA"):
         image = image.convert("RGBA" if "transparency" in image.info or image.mode in ("LA", "P") else "RGB")
+    if image.width > MAX_WIDTH:
+        image = image.resize((MAX_WIDTH, round(image.height * MAX_WIDTH / image.width)))
     buffer = io.BytesIO()
     image.save(buffer, "WEBP", quality=WEBP_QUALITY, method=6)
     return buffer.getvalue()
@@ -62,7 +62,7 @@ def extract(source: Path, out_dir: Path, attachments: Path, convert=None) -> tup
     doc = (convert or converter()).convert(source).document
     markdown = doc.export_to_markdown(image_placeholder=PLACEHOLDER, page_break_placeholder=PAGE_BREAK)
 
-    embeds, names = [], []
+    embeds, images = [], {}  # images: file name -> WebP bytes
     for item, _ in doc.iterate_items():
         if not isinstance(item, PictureItem):
             continue
@@ -73,14 +73,17 @@ def extract(source: Path, out_dir: Path, attachments: Path, convert=None) -> tup
             continue
         # Named by content, so re-extracting gives the same names and identical images are shared.
         name = f"{slug(source.stem)}-{hashlib.sha256(data).hexdigest()[:8]}.webp"
-        attachments.mkdir(parents=True, exist_ok=True)
-        (attachments / name).write_bytes(data)
+        images[name] = data
         embeds.append(f"![[{name}]]")
-        if name not in names:
-            names.append(name)
 
+    # Check before writing anything, so a failed extraction leaves no orphan files in content/.
     if markdown.count(PLACEHOLDER) != len(embeds):
         raise RuntimeError(f"{source.name}: {markdown.count(PLACEHOLDER)} image placeholders but {len(embeds)} pictures")
+    if images:
+        attachments.mkdir(parents=True, exist_ok=True)
+    for name, data in images.items():
+        (attachments / name).write_bytes(data)
+    names = list(images)
     for embed in embeds:
         markdown = markdown.replace(PLACEHOLDER, embed, 1)
     markdown = re.sub(r"\n{3,}", "\n\n", markdown).strip() + "\n"
@@ -94,7 +97,7 @@ def extract(source: Path, out_dir: Path, attachments: Path, convert=None) -> tup
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("files", nargs="+", type=Path)
-    parser.add_argument("--out", type=Path, default=WORK, help="where the raw Markdown goes")
+    parser.add_argument("--out", type=Path, default=notes.WORK, help="where the raw Markdown goes")
     parser.add_argument("--attachments", type=Path, default=notes.ATTACHMENTS, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
 

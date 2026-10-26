@@ -29,7 +29,7 @@ Put the originals to ingest in `sources/` at the repo root. It is gitignored, so
 
 The `/ingest` skill (`.claude/skills/ingest/SKILL.md`) runs these steps in order. Each script can also be run by hand. `PY` below is `pipeline/.venv/Scripts/python`.
 
-1. **Status.** `PY pipeline/lock.py status sources/...` classifies each file as `new`, `changed`, `unchanged` or `skipped`. A PDF next to a DOCX with the same name is skipped (D-005). Only new and changed files go on.
+1. **Status.** `PY pipeline/lock.py status sources/...` classifies each file as `new`, `changed`, `unchanged` or `skipped`. A PDF next to a DOCX with the same name is replaced by that DOCX, even when the PDF is passed on its own (D-005). Paths that don't exist are listed as `skipped (not found)`, and raw extractions in `sources/_work/` are ignored. Only new and changed files go on.
 2. **Extract (deterministic).** `PY pipeline/extract.py <files>` runs Docling (no OCR) and writes the raw Markdown to `sources/_work/<file name>.md`, never straight into `content/` (D-002). Images:
    - converted to WebP (quality 80), at most 1200 px wide;
    - anything under 48 px on a side (bullets, icons, rules) is dropped;
@@ -61,6 +61,7 @@ The `/ingest` skill (`.claude/skills/ingest/SKILL.md`) runs these steps in order
 - **Untouched notes:** a note with nothing to link or tag is left byte for byte.
 - **Removals:** removing a concept or tag from the glossary doesn't unlink or untag existing notes. Clean those up by hand in the same PR.
 - **Validation:** problems stop the run (exit 2) before anything is written. The checks:
+  - an entry that isn't a `concept:` mapping, or has an empty `concept:` or alias;
   - an alias equal to its own concept;
   - a term used by two concepts, or an alias listed twice;
   - a term equal to another note's title or file name;
@@ -117,11 +118,11 @@ The `/ingest` skill (`.claude/skills/ingest/SKILL.md`) runs these steps in order
 
 ```yaml
 sources:
-  Seção 01.docx:
+  Eclesiologia.docx:
     sha256: 3f2a…
     ingested: '2026-10-26'
-    notes: [secoes/01 Introdução.md]
-    attachments: [secao-01-1a2b3c4d.webp]
+    notes: [Módulo 3/Eclesiologia/Unidade I/01 O que é Eclesiologia.md]
+    attachments: [eclesiologia-1a2b3c4d.webp]
 ```
 
 ## `glossary.yml` shape

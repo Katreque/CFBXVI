@@ -26,7 +26,7 @@ Configuration lives in `pwa/config.mjs`: app name and colors, vendor list, patch
 
 ## Service worker behaviour (`pwa/src/sw.js`)
 
-- **Precache-first for everything.** `cleanURLs` maps `/secoes/nota` to `secoes/nota.html`, matching how GitHub Pages serves Quartz output, including accented URLs.
+- **Precache-first for everything.** `cleanURLs` maps `/conceitos/povo-de-deus` to `conceitos/povo-de-deus.html`, matching how GitHub Pages serves Quartz output, including accented URLs.
 - **First visit:** `clientsClaim()` puts the page under the service worker's control immediately, so it works offline right after the first load.
 - **Updates wait for the user.** The new worker installs in the background and stays waiting until the student taps "Atualizar" (`SKIP_WAITING`), then the page reloads.
 - **Offline navigation to an unknown page** falls back to the precached `404.html`.

@@ -77,7 +77,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install linker dependencies
-        run: pip install PyYAML==6.0.3 pytest==9.1.1
+        run: pip install -r pipeline/requirements-linker.txt
 
       - name: Linker tests
         run: python -m pytest pipeline/tests -q --ignore=pipeline/tests/test_extract.py
