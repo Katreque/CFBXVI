@@ -48,28 +48,30 @@ test("manifest is valid and installable", async ({ request }) => {
 test("pages load offline, including accented URLs and full reloads", async ({ page, context }) => {
   await goOffline(page, context)
 
-  await page.goto(`${BASE}secoes/seção-02---aplicações`)
-  await expect(page.locator("h1.article-title")).toHaveText("Seção 02 - Aplicações")
+  await page.goto(`${BASE}módulo-3/eclesiologia/unidade-ii/05-o-espírito-santo,-alma-da-igreja`)
+  await expect(page.locator("h1.article-title")).toHaveText("5 – O Espírito Santo, alma da Igreja")
 
   await page.reload()
-  await expect(page.locator("h1.article-title")).toHaveText("Seção 02 - Aplicações")
+  await expect(page.locator("h1.article-title")).toHaveText("5 – O Espírito Santo, alma da Igreja")
 })
 
 test("SPA navigation through wikilinks works offline", async ({ page, context }) => {
   await goOffline(page, context)
-  await page.goto(`${BASE}secoes/seção-01---introdução`)
-  await page.locator("article a.internal", { hasText: "função" }).first().click()
-  await expect(page.locator("h1.article-title")).toHaveText("Função")
-  await expect(page).toHaveURL(/conceitos\/fun%C3%A7%C3%A3o$/)
+  await page.goto(`${BASE}módulo-3/eclesiologia/unidade-i/01-o-que-é-eclesiologia`)
+  await page.locator("article a.internal", { hasText: "Povo de Deus" }).first().click()
+  await expect(page).toHaveURL(/conceitos\/povo-de-deus$/)
+  // During the SPA swap the old and new titles are briefly both in the DOM.
+  await expect(page.locator("h1.article-title")).toHaveCount(1)
+  await expect(page.locator("h1.article-title")).toHaveText("Povo de Deus")
   // Backlinks only render when wikilinks point at the note itself, not an alias redirect.
-  await expect(page.locator(".backlinks")).toContainText("Seção 01 - Introdução")
+  await expect(page.locator(".backlinks")).toContainText("1 – O que é Eclesiologia")
 })
 
 test("no request fails offline (fonts, scripts, graph libraries)", async ({ page, context }) => {
   await goOffline(page, context)
   const failed = []
   page.on("requestfailed", (r) => failed.push(r.url()))
-  await page.goto(`${BASE}conceitos/função`)
+  await page.goto(`${BASE}conceitos/comunhão-eclesial`)
   await page.waitForLoadState("networkidle")
   // The graph view loads d3 and pixi.js on demand.
   await expect(page.locator(".graph canvas").first()).toBeVisible()
@@ -80,15 +82,15 @@ test("search works offline", async ({ page, context }) => {
   await goOffline(page, context)
   await page.goto(`${BASE}`)
   await openSearch(page)
-  await page.locator(".search-bar").fill("domínio")
-  await expect(page.locator(".search-layout")).toContainText("Domínio")
+  await page.locator(".search-bar").fill("sinodalidade")
+  await expect(page.locator(".search-layout")).toContainText("Sinodalidade")
 })
 
 test("search ignores accents", async ({ page }) => {
   await page.goto(BASE)
   await openSearch(page)
-  await page.locator(".search-bar").fill("funcao")
-  await expect(page.locator(".search-layout")).toContainText("Função")
+  await page.locator(".search-bar").fill("comunhao eclesial")
+  await expect(page.locator(".search-layout")).toContainText("Comunhão eclesial")
 })
 
 test("unknown pages offline fall back to the 404 page", async ({ page, context }) => {

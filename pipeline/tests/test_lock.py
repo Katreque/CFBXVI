@@ -13,6 +13,7 @@ def test_collect_prefers_docx_and_skips_other_files(tmp_path):
     other_pdf = touch(tmp_path / "s02.pdf")
     slides = touch(tmp_path / "sub" / "s03.pptx")
     touch(tmp_path / "~$s01.docx")
+    touch(tmp_path / "_work" / "s01.docx.md")
     txt = touch(tmp_path / "notas.txt")
 
     files, skipped = lock.collect([tmp_path])

@@ -47,7 +47,7 @@ def collect(paths: list[Path]) -> tuple[list[Path], list[tuple[Path, str]]]:
         found += sorted(f for f in p.rglob("*") if f.is_file()) if p.is_dir() else [p]
     files, skipped = [], []
     for f in found:
-        if f.name.startswith("~$"):  # Office lock files
+        if f.name.startswith("~$") or "_work" in f.parts:  # Office lock files, raw extractions
             continue
         if f.suffix.lower() not in FORMATS:
             skipped.append((f, f"unsupported format {f.suffix or '(none)'}"))

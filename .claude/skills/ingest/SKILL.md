@@ -29,18 +29,14 @@ Stop and tell the user if any of these fail:
 
 ## 3. Curate
 
-Read the raw Markdown and write the notes in `content/secoes/`. **Faithfulness comes first: these are course materials. Don't add, summarise or rephrase content; fix only the structure.**
+Read the raw Markdown and write the notes under `content/Módulo N/<Disciplina>/`, following the layout, naming and frontmatter in the "Markdown conventions" of `docs/ingest-pipeline.md`. **Faithfulness comes first: these are course materials. Don't add, summarise or rephrase content; fix only the structure.**
+
+- Split the raw file with a script (by its headings), never by retyping the text. Then check that the notes' words match the raw extraction in order, apart from headings that moved into titles.
+- Box and epigraph paragraphs are identified by their DOCX paragraph styles (`python-docx`, `paragraph.style.name`), not by guessing from the Markdown.
+- Check suspected conversion errors against the DOCX (e.g. auto-numbered headings that lose their number). Real typos in the source stay as they are; list them in the PR.
 
 - Fix headings (one `#`-level hierarchy, no skipped levels; the note title isn't repeated as a `#` heading), lists, tables, broken line wraps, page headers and footers, page numbers, `<!-- página -->` markers and other conversion leftovers.
 - Keep every `![[image.webp]]` embed that shows content. Delete the attachment files of images you drop (logos repeated on every page, decorations).
-- Frontmatter, in this order:
-  ```yaml
-  title: <section title, accents kept>
-  section: <section number>
-  tags: [secao]
-  source: <original file name>
-  ```
-- File naming and splitting follow the conventions in `docs/ingest-pipeline.md`. While those are still open, ask the user before writing the first note.
 - For a `changed` source: compare the new extraction with the existing notes and apply only what changed in the source. Hand fixes already in `content/` must survive (D-002).
 - Don't add new notes to `index.md` pages: folder pages list them automatically.
 
@@ -75,8 +71,8 @@ Identify the concepts a student should be able to look up, and add them to `glos
 
 ## 8. Deliver
 
-- Branch `ingest/<section slug>` (e.g. `ingest/secao-01`), from `master`.
-- One commit, message style `content: <section> ingested` (the repo's commit style; no attribution trailers).
+- Branch `ingest/<subject slug>` (e.g. `ingest/eclesiologia`), from `master`.
+- One commit, message style `content: <subject> ingested` (the repo's commit style; no attribution trailers).
 - `git push -u origin <branch>` then `gh pr create --base master` with a body that lists:
   - the source files and their status (new / changed);
   - the notes created or changed;

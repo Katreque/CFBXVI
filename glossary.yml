@@ -7,4 +7,142 @@
 #
 # The linker owns each concept note's title, aliases and tags. Its body is written once from
 # `description` and can then be edited by hand. See docs/ingest-pipeline.md.
-[]
+
+# --- Eclesiologia (Módulo III) -------------------------------------------------
+
+# Identidade: imagens e propriedades da Igreja
+- concept: Povo de Deus
+  tags: [eclesiologia/identidade]
+  description: 'Imagem da Igreja recuperada pelo Concílio Vaticano II que destaca sua dimensão histórica e comunitária: um povo convocado por Deus, reunido pela fé e pelo Batismo.'
+- concept: Corpo de Cristo
+  aliases: [Corpo Místico de Cristo, Corpo Místico]
+  tags: [eclesiologia/identidade]
+  description: 'Imagem da Igreja que exprime a união vital e orgânica entre Cristo, a Cabeça, e os fiéis, seus membros; união real e sacramental, alimentada especialmente pela Eucaristia.'
+- concept: Templo do Espírito Santo
+  tags: [eclesiologia/identidade]
+  description: 'Imagem da Igreja habitada pelo Espírito Santo, que a vivifica, a unifica e a conduz, distribuindo dons hierárquicos e carismáticos para a edificação do Corpo de Cristo.'
+- concept: Sacramento universal da salvação
+  aliases: [sacramento da salvação]
+  tags: [eclesiologia/identidade]
+  description: 'A Igreja como sinal e instrumento da íntima união com Deus e da unidade de todo o gênero humano (LG, 1): sinal visível que realiza aquilo que significa.'
+- concept: Christus totus
+  aliases: [Cristo total]
+  tags: [eclesiologia/identidade]
+  description: 'O Cristo total, formado pela Cabeça e pelos membros inseparavelmente unidos: noção de Santo Agostinho segundo a qual Cristo e a Igreja formam uma única realidade mística, sem confusão.'
+- concept: Ecclesia permixta
+  tags: [eclesiologia/identidade]
+  description: 'Compreensão agostiniana da Igreja como realidade mista, na qual convivem santos e pecadores até o juízo final: santa por sua origem e missão, mas necessitada de purificação constante.'
+- concept: Notas da Igreja
+  aliases: [quatro notas]
+  tags: [eclesiologia/identidade]
+  description: 'As quatro propriedades que a Igreja professa no Credo (una, santa, católica e apostólica): dons recebidos de Cristo e, ao mesmo tempo, tarefas históricas.'
+- concept: Comunhão eclesial
+  tags: [eclesiologia/identidade]
+  description: 'Participação na própria vida trinitária comunicada por Cristo no Espírito Santo; tem na Eucaristia o seu fundamento e o seu ápice.'
+
+# Origem trinitária da Igreja
+- concept: Ekklesía
+  aliases: [ekklesia]
+  tags: [eclesiologia/origem]
+  description: 'Termo grego que significa “assembleia convocada”; deriva do verbo ek-kaléō, “chamar para fora” ou “convocar”. Designa o povo chamado por Deus.'
+- concept: Ecclesia de Trinitate
+  tags: [eclesiologia/origem]
+  description: 'A Igreja como povo que procede da Trindade: nasce do desígnio amoroso do Pai, é fundada pela missão redentora do Filho e é continuamente animada pelo Espírito Santo.'
+- concept: Economia da salvação
+  tags: [eclesiologia/origem]
+  description: 'O conjunto das ações pelas quais Deus se revela e comunica sua vida à humanidade; nele a Igreja aparece como parte integrante do desígnio do Pai.'
+- concept: Mistério pascal
+  tags: [eclesiologia/origem]
+  description: 'A morte e ressurreição de Cristo, das quais a Igreja nasce organicamente; por isso sua origem é pascal e sacramental.'
+- concept: Pentecostes
+  tags: [eclesiologia/origem]
+  description: 'Efusão do Espírito Santo pela qual a Igreja se manifesta publicamente e recebe o impulso vital que a lança na história; consumação da Páscoa de Cristo.'
+
+# Fontes e método
+- concept: Sagrada Escritura
+  aliases: [Escritura, Escrituras]
+  tags: [eclesiologia/fontes]
+  description: 'Fonte primária da Eclesiologia e “alma da teologia”; é interpretada no seio da Tradição viva da Igreja.'
+- concept: Sagrada Tradição
+  aliases: [Tradição viva]
+  tags: [eclesiologia/fontes]
+  description: 'A transmissão viva do Evangelho, realizada no Espírito Santo ao longo da história; com a Escritura, constitui o depósito da Revelação confiado à Igreja.'
+- concept: Magistério
+  aliases: [Magistério da Igreja]
+  tags: [eclesiologia/fontes]
+  description: 'A autoridade de ensino confiada por Cristo ao colégio dos bispos em comunhão com o Papa, para guardar, interpretar e proclamar a Palavra de Deus, a cujo serviço se coloca.'
+- concept: Sensus fidei
+  aliases: [instinto da fé]
+  tags: [eclesiologia/fontes]
+  description: 'O “instinto da fé”: sentido sobrenatural da fé da totalidade dos fiéis, ungida pelo Espírito Santo, que permite ao Povo de Deus aderir infalivelmente à verdade revelada.'
+- concept: Fides quaerens intellectum
+  tags: [eclesiologia/fontes]
+  description: 'A fé que busca a compreensão: método da teologia, consagrado por Santo Anselmo e aprofundado por São Tomás de Aquino.'
+
+# Estrutura visível, ministérios e vocações
+- concept: Sucessão apostólica
+  tags: [eclesiologia/estrutura]
+  description: 'Realidade sacramental pela qual a missão confiada por Cristo aos Apóstolos continua nos bispos, seus sucessores, garantindo a continuidade da fé e da missão ao longo da história.'
+- concept: Sacerdócio comum
+  aliases: [sacerdócio comum dos fiéis]
+  tags: [eclesiologia/estrutura]
+  description: 'Participação de todos os batizados no único sacerdócio de Cristo, exercida quando oferecem a Deus a própria vida como sacrifício espiritual.'
+- concept: Ministério ordenado
+  aliases: [sacerdócio ministerial]
+  tags: [eclesiologia/estrutura]
+  description: 'Participação no sacerdócio de Cristo essencialmente distinta do sacerdócio comum, conferida pelo sacramento da Ordem para servir o Povo de Deus; tem três graus: episcopado, presbiterado e diaconado.'
+- concept: Múnus sacerdotal, profético e real
+  aliases: [tríplice múnus]
+  tags: [eclesiologia/estrutura]
+  description: 'A tríplice missão de Cristo, da qual todos os batizados participam pela incorporação a Ele.'
+- concept: Diakonia
+  tags: [eclesiologia/estrutura]
+  description: 'Serviço: a forma evangélica de exercer a autoridade na Igreja, na qual governar significa servir.'
+- concept: Sinodalidade
+  tags: [eclesiologia/estrutura]
+  description: 'O caminhar juntos de todo o Povo de Deus; expressão concreta da corresponsabilidade missionária e modo próprio de ser da Igreja como comunhão.'
+- concept: Colegialidade
+  aliases: [colegialidade episcopal]
+  tags: [eclesiologia/estrutura]
+  description: 'Participação do colégio dos bispos, em comunhão com sua Cabeça, na responsabilidade suprema pela Igreja, manifestada especialmente nos Concílios Ecumênicos.'
+- concept: Primado
+  tags: [eclesiologia/estrutura]
+  description: 'Serviço do Bispo de Roma, sucessor de Pedro, à unidade da fé e da comunhão universal.'
+- concept: Infalibilidade
+  tags: [eclesiologia/estrutura]
+  description: 'Carisma concedido à Igreja para que ela não se desvie da verdade salvífica quando se definem, de modo definitivo, questões de fé e moral; não é um privilégio pessoal.'
+- concept: Carisma
+  aliases: [carismas]
+  tags: [eclesiologia/estrutura]
+  description: 'Graça especial concedida pelo Espírito Santo a fiéis de todas as condições, sempre para a utilidade comum e a edificação do Corpo de Cristo.'
+- concept: Leigo
+  aliases: [leigos, laicato]
+  tags: [eclesiologia/estrutura]
+  description: 'Fiel cuja vocação própria se caracteriza pela índole secular: inserido nas realidades do mundo, é chamado a santificá-lo a partir de dentro.'
+- concept: Vida consagrada
+  tags: [eclesiologia/estrutura]
+  description: 'Forma específica de seguimento de Cristo pela profissão dos conselhos evangélicos de castidade, pobreza e obediência; sinal vivo dos bens futuros.'
+
+# Missão e relação com o mundo
+- concept: Reino de Deus
+  aliases: [Reino]
+  tags: [eclesiologia/missao]
+  description: 'A soberania salvadora de Deus que se manifesta na história e alcançará sua plenitude no fim dos tempos; a Igreja é o seu germe e início, não a sua plenitude.'
+- concept: Sinais dos tempos
+  tags: [eclesiologia/missao]
+  description: 'Os acontecimentos, aspirações e dramas da humanidade, que a Igreja é chamada a discernir e interpretar à luz do Evangelho.'
+- concept: Doutrina Social da Igreja
+  tags: [eclesiologia/missao]
+  description: 'Princípios de reflexão, critérios de julgamento e orientações práticas que tornam a fé operante na vida social, fundados na dignidade da pessoa humana, no bem comum, na solidariedade e na subsidiariedade.'
+
+# Concílio Vaticano II e seus documentos
+- concept: Concílio Vaticano II
+  aliases: [Vaticano II]
+  tags: [eclesiologia/concilio]
+  description: 'Concílio que marcou uma profunda renovação eclesiológica ao recuperar a compreensão da Igreja como mistério de fé.'
+- concept: Lumen Gentium
+  tags: [eclesiologia/concilio]
+  description: 'Constituição Dogmática do Concílio Vaticano II sobre a Igreja, que a apresenta como realidade complexa, simultaneamente divina e humana.'
+- concept: Gaudium et Spes
+  tags: [eclesiologia/concilio]
+  description: 'Constituição Pastoral do Concílio Vaticano II, que apresenta a Igreja em relação direta com a história concreta dos homens e com as grandes questões do seu tempo.'
