@@ -66,10 +66,29 @@ jobs:
         with:
           path: public
 
+  glossary:
+    # Linker tests and glossary rules only; extraction (Docling) never runs in CI (D-002).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install linker dependencies
+        run: pip install -r pipeline/requirements-linker.txt
+
+      - name: Linker tests
+        run: python -m pytest pipeline/tests -q --ignore=pipeline/tests/test_extract.py
+
+      - name: Glossary valid and applied
+        run: python pipeline/link.py --check
+
   deploy:
     # Only master reaches production; manual runs on other branches just build and test.
     if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-    needs: build
+    needs: [build, glossary]
     runs-on: ubuntu-latest
     permissions:
       pages: write

@@ -128,3 +128,40 @@ The post-build step also fixes plugins that emit root-absolute `/static/` links 
 **Decision:** The workflow runs `node quartz/bootstrap-cli.mjs <command>` instead of `npx quartz <command>`. Restored the executable bit on `quartz/bootstrap-cli.mjs`, which was lost when Quartz was copied on Windows.
 **Why:** After the first green deploy, two runs failed in "Install Quartz plugins" with exit code 127 (command not found). Running the script directly doesn't depend on how npm resolves the project's own bin, or on the npm cache restored between runs.
 **Consequences:** When vendoring or upgrading Quartz from Windows, check that file modes match upstream (`git ls-files -s`). Locally, `npx quartz ...` still works.
+
+## D-017 · Ingest pipeline implementation
+**Date:** 2026-10-26 · **Status:** Accepted · *Refines D-002, D-003, D-005, D-006*
+
+**Decision:**
+- **Scripts:** `pipeline/` holds three Python scripts: `extract.py` (Docling), `link.py` (glossary linker) and `lock.py` (`sources.lock`). They run in a local venv on Python 3.13, with dependencies pinned in `pipeline/requirements.txt`.
+- **Originals:** the files to ingest go in a gitignored `sources/` folder at the repo root.
+- **Raw output:** extraction writes raw Markdown to `sources/_work/`, never to `content/`. Notes reach `content/` only through curation.
+- **Images:** WebP at quality 80, at most 1200 px wide. Images under 48 px on a side are dropped. File names come from the image content, so re-extracting is stable and duplicates are stored once.
+- **Concept notes:** the linker owns their title, aliases and tags. The body comes from the glossary `description` only when the note is empty.
+- **Validation:** the linker checks the glossary and refuses to write anything if there's a problem.
+- **CI:** a `glossary` job runs the linker tests and `link.py --check`. Deploys wait for it.
+
+**Why:** Keeping raw output out of `content/` means hand fixes are never overwritten (D-002). Content-hashed image names make re-ingesting a changed file produce a reviewable diff. The CI check catches hand edits that would break links or hide backlinks, such as an alias equal to a note title. It needs only PyYAML, so Docling and LLMs stay out of CI.
+**Consequences:** Removing a concept or tag from the glossary doesn't unlink or untag existing notes; that cleanup is done by hand. The first PDF extraction downloads Docling's layout models, so the ingest PC needs internet on that first run.
+
+## D-018 · Course layout: module → subject → unit → one note per chapter
+**Date:** 2026-10-26 · **Status:** Accepted · *Answers the file-naming and note-splitting questions left open in Phase 1*
+
+**Decision:**
+- **Folders and pages:** content is organised as `Módulo N/<Disciplina>/Unidade X/NN <capítulo>.md`. The subject's presentation is the subject's `index.md`, and each unit's introduction is the unit's `index.md`.
+- **Titles:** chapter titles carry their number (`1 – O que é Eclesiologia`). All-caps source titles get normal capitalisation.
+- **Frontmatter:** `module`, `discipline`, `unit` and `chapter` replace the draft `section` field.
+- **Source styles:** the DOCX boxes become callouts (`Box Chave` → tip, `Box Contexto` → info, `Box Liturgia` → note) and epigraphs become blockquotes.
+- **Sumário:** the source's table of contents is dropped.
+- **Typos:** source typos are flagged in the PR, not fixed.
+- **Samples:** the Phase 1 sample notes (`secoes/`, `Função`, `Domínio`) are removed, and the offline tests now use real pages.
+
+**Why:** The first real source (Eclesiologia, Módulo III) is one 170 KB document with 4 units and 14 chapters of 8–16 KB. A note per chapter is a comfortable read on a phone and gives finer-grained backlinks. Folders that mirror the course make breadcrumbs and the explorer match how students know the material. Callouts keep the boxes visually distinct, as the authors intended.
+**Consequences:** Quartz's folder pages sort by date and then alphabetically, not numerically; the explorer sorts numerically by title. Chapter numbers only collide alphabetically across 1–9 vs 10–14, and those never share a unit folder here, so order is correct for now. Revisit the folder-page sort when a unit has ten or more chapters, or if edits reorder pages by date.
+
+## D-019 · Approved typo fixes go straight into the notes
+**Date:** 2026-10-26 · **Status:** Accepted · *Refines D-018*
+
+**Decision:** Curation still leaves source typos as they are and lists them in the PR. Once a maintainer approves a fix, it is made directly in the Markdown note, not in the original DOCX.
+**Why:** Editing the original and re-ingesting is slow for one-word fixes, and the original lives outside the repo (D-006).
+**Consequences:** The note and the original now differ. When that source is re-ingested, these fixes must be carried over like any other hand fix (D-002). The first ones, in Eclesiologia chapter 1: "(LG, 1" → "(LG, 1)", "A expresso" → "A expressão".

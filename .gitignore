@@ -14,3 +14,8 @@ quartz/cli/tui/dist/
 pwa/.tmp/
 pwa/test-results/
 pwa/playwright-report/
+
+# Ingest: source originals stay local (D-006); pipeline venv
+sources/
+pipeline/.venv/
+__pycache__/

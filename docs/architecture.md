@@ -61,10 +61,11 @@ content/              # Quartz input: generated + reviewed Markdown (Obsidian va
   conceitos/          # one note per concept (generated/updated by the linker)
 glossary.yml          # controlled vocabulary: concepts, aliases, tags
 sources.lock          # source file → hash → generated note(s); no originals stored
-pipeline/             # Python: extract, link, image optimisation
+pipeline/             # Python: extract.py, link.py, lock.py, tests/ (venv in pipeline/.venv, gitignored)
+sources/              # gitignored: originals to ingest + _work/ raw extractions
 pwa/                  # PWA post-build package: build.mjs, config.mjs, src/ (sw, client), icons/, tests/
 .claude/skills/ingest # the /ingest Claude Code skill
-.github/workflows/    # deploy.yml: build → PWA → offline tests → Pages (PRs: build + tests only)
+.github/workflows/    # deploy.yml: build → PWA → offline tests → Pages, plus glossary checks (PRs: build + tests only)
 quartz/ ...           # Quartz v5 itself
 ```
 
