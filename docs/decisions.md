@@ -128,3 +128,18 @@ The post-build step also fixes plugins that emit root-absolute `/static/` links 
 **Decision:** The workflow runs `node quartz/bootstrap-cli.mjs <command>` instead of `npx quartz <command>`. Restored the executable bit on `quartz/bootstrap-cli.mjs`, which was lost when Quartz was copied on Windows.
 **Why:** After the first green deploy, two runs failed in "Install Quartz plugins" with exit code 127 (command not found). Running the script directly doesn't depend on how npm resolves the project's own bin, or on the npm cache restored between runs.
 **Consequences:** When vendoring or upgrading Quartz from Windows, check that file modes match upstream (`git ls-files -s`). Locally, `npx quartz ...` still works.
+
+## D-017 · Ingest pipeline implementation
+**Date:** 2026-10-26 · **Status:** Accepted · *Refines D-002, D-003, D-005, D-006*
+
+**Decision:**
+- **Scripts:** `pipeline/` holds three Python scripts: `extract.py` (Docling), `link.py` (glossary linker) and `lock.py` (`sources.lock`). They run in a local venv on Python 3.13, with dependencies pinned in `pipeline/requirements.txt`.
+- **Originals:** the files to ingest go in a gitignored `sources/` folder at the repo root.
+- **Raw output:** extraction writes raw Markdown to `sources/_work/`, never to `content/`. Notes reach `content/` only through curation.
+- **Images:** WebP at quality 80, at most 1200 px wide. Images under 48 px on a side are dropped. File names come from the image content, so re-extracting is stable and duplicates are stored once.
+- **Concept notes:** the linker owns their title, aliases and tags. The body comes from the glossary `description` only when the note is empty.
+- **Validation:** the linker checks the glossary and refuses to write anything if there's a problem.
+- **CI:** a `glossary` job runs the linker tests and `link.py --check`. Deploys wait for it.
+
+**Why:** Keeping raw output out of `content/` means hand fixes are never overwritten (D-002). Content-hashed image names make re-ingesting a changed file produce a reviewable diff. The CI check catches hand edits that would break links or hide backlinks, such as an alias equal to a note title. It needs only PyYAML, so Docling and LLMs stay out of CI.
+**Consequences:** Removing a concept or tag from the glossary doesn't unlink or untag existing notes; that cleanup is done by hand. The first PDF extraction downloads Docling's layout models, so the ingest PC needs internet on that first run.

@@ -1,0 +1,4 @@
+docling==2.142.1
+pillow==13.0.0
+PyYAML==6.0.3
+pytest==9.1.1

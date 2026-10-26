@@ -3,7 +3,7 @@
 | Phase | Deliverable | Done when | Status |
 |---|---|---|---|
 | **1. Site + PWA** | Quartz v5 set up, pt-BR, a few sample notes, manifest, service worker, update prompt, iOS install guide, Pages deploy workflow | Installed on a real iPhone and Android phone, browsable in airplane mode | **Done** (2026-10-23) |
-| **2. Ingest pipeline** | Docling extraction (DOCX/PDF/PPTX), `glossary.yml`, linker, `sources.lock`, `/ingest` skill, PR flow | One real section ingested and reviewed through a PR | Not started |
+| **2. Ingest pipeline** | Docling extraction (DOCX/PDF/PPTX), `glossary.yml`, linker, `sources.lock`, `/ingest` skill, PR flow | One real section ingested and reviewed through a PR | **In progress**: tooling done, waiting on the first real section |
 | **3. Hardening** | Lighthouse CI, image optimisation, Dependabot | CI checks green on every PR | Partly done: offline Playwright tests and the precache size budget already run in CI |
 | **4. Bulk ingest** | All ~20 sections ingested; glossary reviewed with the teacher | Full course available offline | Not started |
 
@@ -18,11 +18,22 @@
 - [x] Real-device check on iPhone: install, airplane mode, update flow (2026-10-23)
 - [ ] Final app name, icon and colors (currently placeholders: "CFBXVI", text icon)
 
+## Phase 2 checklist
+
+- [x] `pipeline/extract.py`: Docling extraction for DOCX/PPTX (tested on generated files); WebP images
+- [x] `pipeline/link.py`: glossary validation, first-mention linking, tags, concept notes, `--check`
+- [x] `pipeline/lock.py`: `sources.lock` status and record; DOCX preferred over PDF
+- [x] `/ingest` skill (`.claude/skills/ingest/SKILL.md`)
+- [x] CI `glossary` job: linker tests + `link.py --check` on every PR
+- [ ] PDF extraction checked on a real course PDF
+- [ ] `gh` installed and logged in on the ingest PC
+- [ ] First real section in `sources/`, ingested, PR reviewed and merged
+- [ ] Sample notes (`Seção 01/02`, `Função`, `Domínio`) removed once real content lands
+
 ## Open questions
 
 - File naming for notes: ` - ` in titles becomes `---` in URLs. Pick a convention on the first real section.
 - One note per section, or split long sections by topic? Decide on the first real section.
-- `gh` CLI isn't installed on the ingest PC yet (needed for the PR step in Phase 2).
 - Upstream PRs, so we can drop our patches (D-013): accent folding and i18n for the "no results" text in `quartz-community/search`; base path in `quartz-community/quartz-fonts`; "Properties" label in `note-properties`.
 
 ## Answered

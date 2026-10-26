@@ -1,0 +1,10 @@
+# Controlled vocabulary for the linker (pipeline/link.py). One entry per concept:
+#
+# - concept: Função                 # becomes content/conceitos/Função.md
+#   aliases: [funções]              # word forms found in the text; never the concept itself
+#   tags: [matematica/funcoes]
+#   description: Relação que associa cada elemento do domínio a exatamente um elemento da imagem.
+#
+# The linker owns each concept note's title, aliases and tags. Its body is written once from
+# `description` and can then be edited by hand. See docs/ingest-pipeline.md.
+[]
