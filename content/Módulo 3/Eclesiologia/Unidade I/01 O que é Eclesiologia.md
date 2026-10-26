@@ -8,7 +8,7 @@ tags: [eclesiologia, eclesiologia/identidade, eclesiologia/origem, eclesiologia/
 source: Eclesiologia.docx
 ---
 
-> “A Igreja, em Cristo, é como que o sacramento, ou sinal, e o instrumento da íntima união com Deus e da unidade de todo o gênero humano.” (LG, 1
+> “A Igreja, em Cristo, é como que o sacramento, ou sinal, e o instrumento da íntima união com Deus e da unidade de todo o gênero humano.” (LG, 1)
 
 Antes de falar da Igreja, é necessário aprender a olhá-la com os olhos da fé. Para muitos, a Igreja se apresenta primeiramente como uma instituição visível, com estruturas, normas, ministros e uma história marcada por luzes e sombras. No entanto, essa percepção inicial, embora real, não esgota aquilo que a Igreja é em sua profundidade. A fé cristã afirma que a Igreja não nasce da simples iniciativa humana, mas do próprio desígnio de Deus, manifestado plenamente em Jesus Cristo e atualizado pela ação do Espírito Santo ao longo da história.
 
@@ -84,7 +84,7 @@ Nesse sentido, a Eclesiologia desempenha um papel decisivo ao resgatar a identid
 
 > [!tip] “Ekklesía tou Theou”: a Igreja como convocação de Deus
 >
-> A expresso ἐκκλησία τοῦ Θεοῦ (*Ekklesía tou Theou*), traduzida como *Igreja de Deus*, é uma das designações mais antigas e fundamentais da Igreja no Novo Testamento, especialmente nas cartas paulinas (cf. 1Cor 1,2; 10,32; 15,9).
+> A expressão ἐκκλησία τοῦ Θεοῦ (*Ekklesía tou Theou*), traduzida como *Igreja de Deus*, é uma das designações mais antigas e fundamentais da Igreja no Novo Testamento, especialmente nas cartas paulinas (cf. 1Cor 1,2; 10,32; 15,9).
 >
 > O termo ἐκκλησία (*ekklesía*) deriva do verbo *ek-kaléō*, que significa “chamar para fora” ou “convocar”. No mundo grego, designava a assembleia dos cidadãos reunidos por convocação pública; na Sagrada Escritura, esse termo é assumido para expressar uma realidade nova e mais profunda: não uma assembleia que se reúne por iniciativa própria, mas um povo chamado por Deus.
 >

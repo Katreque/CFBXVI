@@ -158,3 +158,10 @@ The post-build step also fixes plugins that emit root-absolute `/static/` links 
 
 **Why:** The first real source (Eclesiologia, Módulo III) is one 170 KB document with 4 units and 14 chapters of 8–16 KB. A note per chapter is a comfortable read on a phone and gives finer-grained backlinks. Folders that mirror the course make breadcrumbs and the explorer match how students know the material. Callouts keep the boxes visually distinct, as the authors intended.
 **Consequences:** Quartz's folder pages sort by date and then alphabetically, not numerically; the explorer sorts numerically by title. Chapter numbers only collide alphabetically across 1–9 vs 10–14, and those never share a unit folder here, so order is correct for now. Revisit the folder-page sort when a unit has ten or more chapters, or if edits reorder pages by date.
+
+## D-019 · Approved typo fixes go straight into the notes
+**Date:** 2026-10-26 · **Status:** Accepted · *Refines D-018*
+
+**Decision:** Curation still leaves source typos as they are and lists them in the PR. Once a maintainer approves a fix, it is made directly in the Markdown note, not in the original DOCX.
+**Why:** Editing the original and re-ingesting is slow for one-word fixes, and the original lives outside the repo (D-006).
+**Consequences:** The note and the original now differ. When that source is re-ingested, these fixes must be carried over like any other hand fix (D-002). The first ones, in Eclesiologia chapter 1: "(LG, 1" → "(LG, 1)", "A expresso" → "A expressão".

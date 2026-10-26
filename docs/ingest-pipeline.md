@@ -111,7 +111,7 @@ The `/ingest` skill (`.claude/skills/ingest/SKILL.md`) runs these steps in order
 - Note titles keep Portuguese accents. Quartz keeps them in URLs too, lowercased. These URLs work offline (tested).
 - **An alias must never equal the note's own title (case-insensitive).** Quartz creates a redirect page for each alias. An alias such as `função` on the note `Função` takes over the note's URL: wikilinks then point to the redirect, and **backlinks disappear**. The linker must validate this, and also that no alias collides with another note's title.
 - Every folder gets an `index.md` with a Portuguese `title` (otherwise breadcrumbs show the raw folder name).
-- **Source typos** are not fixed during curation. They're listed in the PR for the teacher to fix in the original.
+- **Source typos** are not fixed during curation; they're listed in the PR. Once a maintainer approves a fix, it's made directly in the note (D-019). It's a hand fix, so it must survive re-ingests of the same source (D-002).
 
 ## `sources.lock` shape
 
