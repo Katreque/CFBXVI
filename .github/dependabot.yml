@@ -23,11 +23,19 @@ updates:
       quartz:
         update-types: [minor, patch]
 
-  # PWA post-build step and offline tests.
+  # PWA post-build step and offline tests. katex, d3 and pixi.js replace the CDN URLs
+  # Quartz emits (pwa/config.mjs), so they follow Quartz: katex is pinned exactly there,
+  # d3 and pixi.js by major.
   - package-ecosystem: npm
     directory: /pwa
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: katex
+      - dependency-name: d3
+        update-types: ["version-update:semver-major"]
+      - dependency-name: pixi.js
+        update-types: ["version-update:semver-major"]
     groups:
       pwa:
         update-types: [minor, patch]
