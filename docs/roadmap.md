@@ -37,7 +37,7 @@
 - [x] Offline Playwright tests and precache size budget in CI
 - [x] Dependabot for Actions, npm and pip (D-020)
 - [x] Playwright browser cached in CI; runner pinned to `ubuntu-24.04` (D-020)
-- [ ] Actions updated off Node 20 (first Dependabot PR)
+- [x] Actions updated off Node 20 (Dependabot PR #3)
 - [ ] Lighthouse CI with score thresholds
 - [ ] Image size and format check for `content/attachments/`
 
