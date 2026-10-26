@@ -4,7 +4,7 @@
 |---|---|---|---|
 | **1. Site + PWA** | Quartz v5 set up, pt-BR, a few sample notes, manifest, service worker, update prompt, iOS install guide, Pages deploy workflow | Installed on a real iPhone and Android phone, browsable in airplane mode | **Done** (2026-10-23) |
 | **2. Ingest pipeline** | Docling extraction (DOCX/PDF/PPTX), `glossary.yml`, linker, `sources.lock`, `/ingest` skill, PR flow | One real section ingested and reviewed through a PR | **Done** (2026-10-26): Eclesiologia (Módulo III) merged in PR #1 and deployed |
-| **3. Hardening** | Lighthouse CI, image optimisation, Dependabot | CI checks green on every PR | Partly done: offline Playwright tests and the precache size budget already run in CI |
+| **3. Hardening** | Lighthouse CI, image optimisation, Dependabot | CI checks green on every PR | In progress: offline tests, precache budget, Dependabot and Playwright cache done |
 | **4. Bulk ingest** | All ~20 sections ingested; glossary reviewed with the teacher | Full course available offline | Not started |
 
 ## Phase 1 checklist
@@ -31,6 +31,15 @@
 - [x] Eclesiologia PR reviewed (glossary first), code-reviewed and merged; live on Pages (2026-10-26)
 - [x] Sample notes (`Seção 01/02`, `Função`, `Domínio`) removed; offline tests use real pages
 - [x] Layout and naming decided (D-018)
+
+## Phase 3 checklist
+
+- [x] Offline Playwright tests and precache size budget in CI
+- [x] Dependabot for Actions, npm and pip (D-020)
+- [x] Playwright browser cached in CI; runner pinned to `ubuntu-24.04` (D-020)
+- [ ] Actions updated off Node 20 (first Dependabot PR)
+- [ ] Lighthouse CI with score thresholds
+- [ ] Image size and format check for `content/attachments/`
 
 ## Open questions
 

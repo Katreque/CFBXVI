@@ -165,3 +165,10 @@ The post-build step also fixes plugins that emit root-absolute `/static/` links 
 **Decision:** Curation still leaves source typos as they are and lists them in the PR. Once a maintainer approves a fix, it is made directly in the Markdown note, not in the original DOCX.
 **Why:** Editing the original and re-ingesting is slow for one-word fixes, and the original lives outside the repo (D-006).
 **Consequences:** The note and the original now differ. When that source is re-ingested, these fixes must be carried over like any other hand fix (D-002). The first ones, in Eclesiologia chapter 1: "(LG, 1" → "(LG, 1)", "A expresso" → "A expressão".
+
+## D-020 · Dependabot for updates, cached Playwright browser, pinned runner
+**Date:** 2026-10-26 · **Status:** Accepted
+
+**Decision:** Dependabot opens weekly PRs for GitHub Actions, npm (Quartz at `/`, PWA at `/pwa`) and pip (`/pipeline`), with minor and patch updates grouped per ecosystem. Majors are ignored for the vendored Quartz dependencies. CI caches Playwright's Chromium per Playwright version, and jobs run on `ubuntu-24.04` instead of `ubuntu-latest`.
+**Why:** Every version is pinned exactly, so nothing moves unless a PR moves it, and CI tests each one. Quartz majors belong to a Quartz upgrade (D-010). Downloading Chromium took about 10 of the build's 11 minutes. `ubuntu-latest` moved to a new Ubuntu release on its own in October 2026, and an OS change should be a reviewed PR.
+**Consequences:** Docling and Pillow updates are not exercised by CI (D-002): run `pytest pipeline/tests` locally before merging them. A cache hit still installs Chromium's system packages (`playwright install-deps`). Moving to a newer Ubuntu is a manual one-line change.

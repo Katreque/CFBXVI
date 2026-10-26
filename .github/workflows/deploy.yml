@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         with:
@@ -44,9 +44,27 @@ jobs:
       - name: Add PWA (vendor assets, manifest, service worker)
         run: npm --prefix pwa run build
 
+      # Chromium is cached per Playwright version; downloading it took most of the build time.
+      - name: Get Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('./pwa/package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browser
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
       - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: pwa
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        working-directory: pwa
+        run: npx playwright install-deps chromium
 
       - name: Offline tests
         working-directory: pwa
@@ -68,7 +86,7 @@ jobs:
 
   glossary:
     # Linker tests and glossary rules only; extraction (Docling) never runs in CI (D-002).
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
 
@@ -89,7 +107,7 @@ jobs:
     # Only master reaches production; manual runs on other branches just build and test.
     if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
     needs: [build, glossary]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pages: write
       id-token: write
