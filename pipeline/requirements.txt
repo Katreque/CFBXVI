@@ -2,5 +2,5 @@
 -r requirements-linker.txt
 
 # Extraction
-docling==2.142.1
+docling==2.145.0
 pillow==13.0.0
